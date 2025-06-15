@@ -1,10 +1,10 @@
 import express from 'express';
 import { verifyToken } from '../utils/verifyUser.js';
 import {
-  create,
-  deletepost,
-  getposts,
-  updatepost,
+  createPost,
+  deletePost,
+  getPosts,
+  updatePost,
   getFlags,
   validateCreatePost,
   validateGetPosts,
@@ -14,16 +14,16 @@ import {
 const router = express.Router();
 
 // 🟢 Create Post
-router.post('/create', verifyToken, validateCreatePost, create);
+router.post('/create', verifyToken, validateCreatePost, createPost);
 
 // 🟢 Get All Posts
-router.get('/getposts', validateGetPosts, getposts);
+router.get('/getposts', validateGetPosts, getPosts);
 
 // 🟢 Delete Post
-router.delete('/deletepost/:postId/:userId', verifyToken, validateIdParams, deletepost);
+router.delete('/deletepost/:postId/:userId', verifyToken, validateIdParams, deletePost);
 
 // 🟢 Update Post
-router.put('/updatepost/:postId/:userId', verifyToken, validateIdParams, updatepost);
+router.put('/updatepost/:postId/:userId', verifyToken, validateIdParams, updatePost);
 
 // 🟢 Get Flags for a User
 router.get('/posts/:userId', verifyToken, validateIdParams, getFlags);

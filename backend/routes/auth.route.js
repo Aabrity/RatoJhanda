@@ -9,7 +9,7 @@ import {
   sendContactEmail
 } from '../controllers/auth.controller.js';
 import rateLimit from 'express-rate-limit';
-import { validateEmail, validateSignup, validatePasswordReset } from '../middleware/validators.js';
+import { validateEmail, validateSignup, validatePasswordReset } from '../utils/validators.js';
 
 const router = express.Router();
 

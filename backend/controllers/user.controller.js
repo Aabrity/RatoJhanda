@@ -2,7 +2,9 @@ import bcryptjs from 'bcryptjs';
 import { errorHandler } from '../utils/error.js';
 import User from '../models/user.model.js';
 import mongoose from 'mongoose';
-import { isEmail } from 'validator';
+import validator from 'validator';
+const { isEmail } = validator;
+
 
 // Utility: Validate ObjectId
 const validateObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
