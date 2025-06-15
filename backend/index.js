@@ -36,7 +36,7 @@ const app = express();
 app.use(helmet()); // Sets secure HTTP headers
 app.use(mongoSanitize()); // Prevents NoSQL injection
 app.use(xssClean()); // Prevents XSS attacks
-app.use(cors({ origin: 'https://yourdomain.com', credentials: true })); // Restrict CORS origin
+app.use(cors({ origin: 'http://localhost:5173/', credentials: true })); // Restrict CORS origin
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
