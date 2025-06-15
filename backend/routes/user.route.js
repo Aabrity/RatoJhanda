@@ -20,7 +20,8 @@ router.put('/update/:userId', verifyToken, isAdminOrSelf, updateUser);
 router.delete('/delete/:userId', verifyToken, isAdminOrSelf, deleteUser);
 
 // Authenticated only
-router.post('/signout', verifyToken, signout);
+// router.post('/signout', verifyToken, signout);
+router.post('/signout', signout);
 
 // Admin-only
 router.get('/getusers', verifyToken, isAdmin, getUsers);
