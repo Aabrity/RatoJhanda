@@ -189,7 +189,8 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { sendEmail } from '../utils/sendEmail.js';
 import nodemailer from 'nodemailer';
-import { isEmail } from 'validator';
+import validator from 'validator';
+const { isEmail } = validator;
 
 // Helpers
 const generateOTP = () => crypto.randomInt(100000, 999999).toString();
