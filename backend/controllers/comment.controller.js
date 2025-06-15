@@ -55,6 +55,7 @@ export const getPostComments = async (req, res, next) => {
 };
 
 // ✅ Like / Unlike a Comment
+// ✅ Like / Unlike a Comment
 export const likeComment = async (req, res, next) => {
   try {
     const { commentId } = req.params;
@@ -68,23 +69,23 @@ export const likeComment = async (req, res, next) => {
     const userId = req.user.id;
     const liked = comment.likes.includes(userId);
 
-    if (liked) {
-      comment.likes.pull(userId);
-    } else {
-      comment.likes.push(userId);
-    }
+    if (liked) comment.likes.pull(userId);
+    else comment.likes.push(userId);
 
     await comment.save();
 
+    // 🔑  Return the updated likes array so the frontend has what it needs
     res.status(200).json({
       success: true,
       liked: !liked,
+      likes: comment.likes,          // <-- add this
       likeCount: comment.likes.length,
     });
   } catch (error) {
     next(error);
   }
 };
+
 
 // ✅ Edit a Comment
 export const editComment = async (req, res, next) => {
