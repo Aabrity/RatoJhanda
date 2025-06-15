@@ -268,14 +268,25 @@ export const signup = async (req, res, next) => {
 
 // Verify Email
 export const verifyEmail = async (req, res, next) => {
+  
   try {
     const { email, otp } = req.body;
     if (!email || !otp) return next(errorHandler(400, 'Email and OTP required'));
 
-    const user = await User.findOne({ email });
-    if (!user || user.otp !== hashOTP(otp) || user.otpExpires < new Date()) {
-      return next(errorHandler(400, 'Invalid or expired OTP'));
-    }
+//     const user = await User.findOne({ email });
+//     console.log('otpExpires:', user.otpExpires);
+// console.log('otpExpires timestamp:', user.otpExpires.getTime());
+// console.log('Date.now():', Date.now());
+// console.log('otpHashes match:', user.otp === hashOTP(otp));
+
+//     if (!user || user.otp !== hashOTP(otp) || user.otpExpires.getTime() < Date.now()) {
+//       return next(errorHandler(400, 'Invalid or expired OTP'));
+//     }
+const user = await User.findOne({ email }).select('+otp +otpExpires');
+if (!user || user.otp !== hashOTP(otp) || user.otpExpires.getTime() < Date.now()) {
+  return next(errorHandler(400, 'Invalid or expired OTP'));
+}
+
 
     user.isVerified = true;
     user.otp = undefined;

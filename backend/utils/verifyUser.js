@@ -6,7 +6,7 @@ import { errorHandler } from './error.js';
  */
 export const verifyToken = (req, res, next) => {
   try {
-    const token = req.cookies?.access_token;
+    const token = req.cookies.access_token;
 
     if (!token) {
       return next(errorHandler(401, 'Access denied. No token provided.'));

@@ -18,14 +18,14 @@ const commentSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
-    likes: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    }],
+     likes: {
+      type: Array,
+      default: [],
+    },
     numberOfLikes: {
       type: Number,
       default: 0,
-      select: false, // hide from default query unless explicitly needed
+    //   select: false, // hide from default query unless explicitly needed
     },
     reportCount: {
       type: Number,
@@ -40,9 +40,9 @@ const commentSchema = new mongoose.Schema(
 );
 
 // Optional: Use a virtual instead of numberOfLikes
-commentSchema.virtual('likeCount').get(function () {
-  return this.likes.length;
-});
+// commentSchema.virtual('likeCount').get(function () {
+//   return this.likes.length;
+// });
 
 const Comment = mongoose.model('Comment', commentSchema);
 

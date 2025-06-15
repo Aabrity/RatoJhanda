@@ -23,18 +23,14 @@ export const validateCreatePost = [
     .withMessage('Content must be at least 10 characters.'),
   body('category')
     .optional()
-    .isIn(['incident', 'lost-found', 'uncategorized']),
+    .isIn(['Suspicious & Criminal Activity', 'Lost & Found','Accidents & Public Hazards', 'uncategorized']),
   body('images')
-    .optional()
-    .isArray()
-    .withMessage('Images must be an array of URLs.'),
-  body('geolocation').optional().custom((val) => {
-    return (
-      val &&
-      typeof val.lat === 'number' &&
-      typeof val.lng === 'number'
-    );
-  }),
+    .optional(),
+
+    // .isArray()
+    // .withMessage('Images must be an array of URLs.'),
+//  
+// ),
 ];
 
 export const validateGetPosts = [
@@ -73,7 +69,7 @@ const handleValidation = (req, next) => {
 export const createPost = async (req, res, next) => {
   handleValidation(req, next);
 
-  const { title, content, category, images, geolocation } = req.body;
+  const { title, content, category, images,location, geolocation } = req.body;
   const slug = buildSlug(title);
 
   try {
@@ -87,6 +83,7 @@ export const createPost = async (req, res, next) => {
       content: safeContent,
       category,
       images,
+      location,
       geolocation,
       slug,
       userId: req.user.id,

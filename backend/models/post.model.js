@@ -45,12 +45,8 @@ const postSchema = new Schema(
     },
 
     /* ─── META ─────────────────────────────────────────────────────────── */
-    images: {
-      type: [String],
-      validate: {
-        validator: (arr) => arr.every((u) => URL_REGEX.test(u)),
-        message: 'Invalid image URL detected.',
-      },
+     images: {
+      type: String,
       default: [
         'https://www.hostinger.com/tutorials/wp-content/uploads/sites/2/2021/09/how-to-write-a-blog-post.png',
       ],
@@ -58,18 +54,18 @@ const postSchema = new Schema(
     isAnonymous: {
       type: Boolean,
       default: false,
-      immutable: true,      // can’t flip after creation
+    //   immutable: true,      // can’t flip after creation
     },
     category: {
       type: String,
-      enum: ['incident', 'lost-found', 'uncategorized'],
+      enum: ['Suspicious & Criminal Activity', 'Lost & Found', 'Accidents & Public Hazards','uncategorized'],
       default: 'uncategorized',
-      lowercase: true,
+    //   lowercase: true,
       index: true,
     },
     flag: {
       type: String,
-      enum: ['redflag', 'yellowflag', 'greenflag'],
+      enum: ['redflag',  'greenflag'],
       default: 'redflag',
     },
 
@@ -80,30 +76,15 @@ const postSchema = new Schema(
       trim: true,
     },
     geolocation: {
-      type: {
-        type: String,
-        enum: ['Point'],
-        default: 'Point',
-      },
-      coordinates: {
-        // Mongo expects [lng, lat]
-        type: [Number],
-        required: true,
-        validate: {
-          validator: (val) =>
-            Array.isArray(val) &&
-            val.length === 2 &&
-            val.every((n) => typeof n === 'number'),
-          message: 'geolocation must be [lng, lat]',
-        },
-      },
+      lat: { type: Number, required: true },
+      lng: { type: Number, required: true },
     },
   },
   { timestamps: true, versionKey: false }
 );
 
 /* ─── INDEXES & PLUGINS ────────────────────────────────────────────────── */
-postSchema.index({ geolocation: '2dsphere' });      // enables fast geo queries
+// postSchema.index({ geolocation: '2dsphere' });      // enables fast geo queries
 postSchema.plugin(uniqueValidator, {
   message: '{PATH} already exists.',
 });

@@ -13,15 +13,15 @@ import { verifyToken } from '../utils/verifyUser.js';
 const router = express.Router();
 
 // ✅ Public: Get all comments for a post
-router.get('/post/:postId', getPostComments);
+router.get('/getPostComments/:postId', getPostComments);
 
 // ✅ Authenticated users
-router.post('/', verifyToken, createComment);
-router.put('/like/:commentId', verifyToken, likeComment);
-router.put('/:commentId', verifyToken, editComment);
-router.delete('/:commentId', verifyToken, deleteComment);
+router.post('/create', verifyToken, createComment);
+router.put('/likeComment/:commentId', verifyToken, likeComment);
+router.put('/editComment/:commentId', verifyToken, editComment);
+router.delete('/deleteComment/:commentId', verifyToken, deleteComment);
 
 // ✅ Admin only: full access with stats
-router.get('/', verifyToken, isAdmin, getcomments);
+router.get('/getcomments', verifyToken, isAdmin, getcomments);
 
 export default router;
