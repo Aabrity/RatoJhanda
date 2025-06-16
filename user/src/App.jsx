@@ -17,11 +17,13 @@ import Search from './pages/Search';
 import Help from './pages/helpnContact';
 import ContactPage from './pages/contact';
 
+import { Toaster } from 'react-hot-toast'; 
 export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
       <Header />
+       <Toaster position="top-right" reverseOrder={false} /> 
       <Routes>
         <Route path='/' element={<Home />} />
          <Route path='/help' element={<Help/>} />
