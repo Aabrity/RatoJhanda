@@ -2,7 +2,7 @@ import express from 'express';
 import { body } from 'express-validator';
 import { reportPost } from '../controllers/report.controller.js';
 import { verifyToken } from '../utils/verifyUser.js';
-import { assertValid } from '../utils/validate.js'; // your existing validation middleware
+// import { assertValid } from '../utils/validate.js'; // your existing validation middleware
 
 const router = express.Router();
 
@@ -16,7 +16,6 @@ router.post(
     .optional()
     .isLength({ max: 500 })
     .withMessage('Comment too long'),
-  assertValid,
   reportPost
 );
 

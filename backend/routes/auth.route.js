@@ -9,6 +9,9 @@ import {
   resetPassword,
   sendContactEmail
 } from '../controllers/auth.controller.js';
+import { deleteReportAndPost } from '../controllers/report.controller.js';
+import { verifyToken } from '../utils/verifyUser.js';
+import {  isAdmin } from '../utils/verifyRoles.js';
 import rateLimit from 'express-rate-limit';
 import { validateEmail, validateSignup, validatePasswordReset } from '../utils/validators.js';
 
@@ -33,7 +36,7 @@ router.get('/admin/reports', verifyToken, getAllReports);
 router.delete(
   '/admin/deleteWithPost/:reportId',
   verifyToken,
-  verifyAdmin,
+  isAdmin,
   deleteReportAndPost
 );
 

@@ -31,8 +31,7 @@ export const reportPost = async (req, res, next) => {
     next(err);
   }
 };
-import Report from '../models/Report.js';
-import Post from '../models/Post.js';
+
 
 // Middleware ensures req.user.isAdmin is true before running this
 
