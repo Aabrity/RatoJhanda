@@ -175,7 +175,8 @@ export const deletePost = async (req, res, next) => {
       return next(errorHandler(403, 'Not authorized.'));
     }
 
-    await post.remove();
+    // await post.remove();
+    await post.deleteOne({ _id: post._id });
     res.status(200).json('Post deleted.');
   } catch (err) {
     next(err);

@@ -12,13 +12,13 @@ import Footer from './components/Footer';
 import CreateFlag from './pages/createFlag.jsx';
 // import UpdatePost from './pages/UpdatePost';
 import PostPage from './pages/PostPage';
-// import ScrollToTop from './components/ScrollToTop';
+import ScrollToTop from './components/ScrollToTop';
 import Search from './pages/Search';
 
 export default function App() {
   return (
     <BrowserRouter>
-      {/* <ScrollToTop /> */}
+      <ScrollToTop />
       <Header />
       <Routes>
         <Route path='/' element={<Home />} />
@@ -26,15 +26,15 @@ export default function App() {
         <Route path='/sign-in' element={<SignIn />} />
         <Route path='/sign-up' element={<SignUp />} />
         <Route path='/search' element={<Search />} />
-        {/* <Route element={<PrivateRoute />}> */}
+        <Route element={<PrivateRoute />}>
           <Route path='/dashboard' element={<Dashboard />} />
            <Route path='/createflag' element={<CreateFlag />} />
            {/* <Route path='/update-post/:postId' element={<UpdatePost />} /> */}
-        {/* </Route> */}
-        {/* <Route element={<OnlyAdminPrivateRoute />}> */}
+        </Route>
+        <Route element={<OnlyAdminPrivateRoute />}>
           {/* <Route path='/create-post' element={<CreatePost />} /> */}
           
-        {/* </Route> */}
+        </Route>
 
         <Route path='/flags' element={<Flags />} />
         <Route path='/post/:postSlug' element={<PostPage />} />
