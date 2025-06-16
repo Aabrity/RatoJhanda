@@ -13,7 +13,7 @@ export default function DashReports() {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const res = await fetch(`/api/report/admin/reports`);
+        const res = await fetch(`/api/auth/admin/reports`);
         const data = await res.json();
         if (res.ok) {
           setReports(data);
@@ -34,7 +34,7 @@ export default function DashReports() {
     const startIndex = reports.length;
     try {
       const res = await fetch(
-        `/api/report/admin/reports?startIndex=${startIndex}`
+        `/api/auth/admin/reports?startIndex=${startIndex}`
       );
       const data = await res.json();
       if (res.ok) {
@@ -51,7 +51,7 @@ export default function DashReports() {
   const handleDeleteReport = async () => {
     setShowModal(false);
     try {
-      const res = await fetch(`/api/report/admin/deleteWithPost/${reportIdToDelete}`, {
+      const res = await fetch(`/api/auth/admin/deleteWithPost/${reportIdToDelete}`, {
         method: 'DELETE',
       });
       const data = await res.json();
