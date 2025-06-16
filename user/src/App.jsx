@@ -14,14 +14,20 @@ import UpdatePost from './pages/UpdatePost';
 import PostPage from './pages/PostPage';
 import ScrollToTop from './components/ScrollToTop';
 import Search from './pages/Search';
+import Help from './pages/helpnContact';
+import ContactPage from './pages/contact';
 
+import { Toaster } from 'react-hot-toast'; 
 export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
       <Header />
+       <Toaster position="top-right" reverseOrder={false} /> 
       <Routes>
         <Route path='/' element={<Home />} />
+         <Route path='/help' element={<Help/>} />
+         <Route path='/contact' element={<ContactPage/>} />
         <Route path='/about' element={<About />} />
         <Route path='/sign-in' element={<SignIn />} />
         <Route path='/sign-up' element={<SignUp />} />
