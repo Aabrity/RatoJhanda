@@ -6,7 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Flags from './pages/Flags';
 import SignUp from './pages/SignUp';
 import Header from './components/Header';
-// import Footer from './components/Footer';
+import Footer from './components/Footer';
 // import PrivateRoute from './components/PrivateRoute';
 // import OnlyAdminPrivateRoute from './components/OnlyAdminPrivateRoute';
 import CreateFlag from './pages/createFlag.jsx';
@@ -39,7 +39,7 @@ export default function App() {
         <Route path='/flags' element={<Flags />} />
         <Route path='/post/:postSlug' element={<PostPage />} />
       </Routes>
-      {/* <Footer /> */}
+      <Footer />
     </BrowserRouter>
   );
 }
