@@ -114,7 +114,7 @@
 "use client"
 
 import { Sidebar } from "flowbite-react"
-import { HiUser, HiArrowSmRight, HiDocumentText, HiOutlineUserGroup, HiAnnotation, HiChartPie, HiFlag } from "react-icons/hi"
+import { HiUser, HiArrowSmRight, HiDocumentText, HiOutlineUserGroup, HiAnnotation, HiChartPie, HiFlag, HiExclamation } from "react-icons/hi"
 import { useEffect, useState } from "react"
 import { Link, useLocation } from "react-router-dom"
 import { signoutSuccess } from "../redux/user/userSlice"
@@ -195,6 +195,12 @@ export default function DashSidebar() {
             icon: HiAnnotation,
             href: "/dashboard?tab=comments",
             isActive: tab === "comments",
+          },
+          {
+            label: "Reports",
+            icon: HiExclamation,
+            href: "/dashboard?tab=reports",
+            isActive: tab === "reports",
           },
         ]
       : []),

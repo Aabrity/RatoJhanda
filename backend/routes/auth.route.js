@@ -1,4 +1,5 @@
 import express from 'express';
+import { getAllReports } from '../controllers/admin.controller.js';
 import {
   google,
   signin,
@@ -28,5 +29,12 @@ router.post('/verify-email', validateEmail, verifyEmail);
 router.post('/request-password-reset', validateEmail, authLimiter, requestPasswordReset);
 router.post('/reset-password', validatePasswordReset, authLimiter, resetPassword);
 router.post('/sendEmail', authLimiter, sendContactEmail); // validate this if handling custom email content
+router.get('/admin/reports', verifyToken, getAllReports);
+router.delete(
+  '/admin/deleteWithPost/:reportId',
+  verifyToken,
+  verifyAdmin,
+  deleteReportAndPost
+);
 
 export default router;
