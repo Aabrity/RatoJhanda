@@ -98,6 +98,51 @@ export const createPost = async (req, res, next) => {
 
 /* --------------------------------------------------------------- */
 
+// export const getPosts = async (req, res, next) => {
+//   handleValidation(req, next);
+
+//   const startIndex = parseInt(req.query.startIndex) || 0;
+//   const limit = parseInt(req.query.limit) || 9;
+//   const sortDir = req.query.order === 'asc' ? 1 : -1;
+
+//   /* Build dynamic filter ---------------------------------------- */
+//   const filter = {};
+//   if (req.query.userId) filter.userId = req.query.userId;
+//   if (req.query.postId) filter._id = req.query.postId;
+//   if (req.query.slug) filter.slug = req.query.slug;
+//   if (req.query.category && req.query.category !== 'uncategorized') {
+//     filter.category = req.query.category;
+//   }
+//   if (req.query.searchTerm) {
+//     const rx = { $regex: req.query.searchTerm, $options: 'i' };
+//     filter.$or = [{ title: rx }, { content: rx }, { location: rx }];
+//   }
+
+//   try {
+//     const posts = await Post.find(filter)
+//       .populate('userId', 'username') // N+1 fix
+//       .sort({ updatedAt: sortDir })
+//       .skip(startIndex)
+//       .limit(limit)
+//       .lean(); // faster read‑only docs
+
+//     /* Add computed userName field ------------------------------ */
+//     const enriched = posts.map((p) => ({
+//       ...p,
+//       userName: p.userId?.username ?? 'Anonymous',
+//     }));
+
+//     /* Meta counts ---------------------------------------------- */
+//     const totalPosts = await Post.countDocuments();
+//     const lastMonthPosts = await Post.countDocuments({
+//       createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+//     });
+
+//     res.status(200).json({ posts: enriched, totalPosts, lastMonthPosts });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 export const getPosts = async (req, res, next) => {
   handleValidation(req, next);
 
@@ -105,7 +150,7 @@ export const getPosts = async (req, res, next) => {
   const limit = parseInt(req.query.limit) || 9;
   const sortDir = req.query.order === 'asc' ? 1 : -1;
 
-  /* Build dynamic filter ---------------------------------------- */
+  // Build dynamic filter
   const filter = {};
   if (req.query.userId) filter.userId = req.query.userId;
   if (req.query.postId) filter._id = req.query.postId;
@@ -120,19 +165,32 @@ export const getPosts = async (req, res, next) => {
 
   try {
     const posts = await Post.find(filter)
-      .populate('userId', 'username') // N+1 fix
+      .populate('userId', 'username') // N+1 fix: only fetch username
       .sort({ updatedAt: sortDir })
       .skip(startIndex)
       .limit(limit)
-      .lean(); // faster read‑only docs
+      .lean(); // lean improves read performance
 
-    /* Add computed userName field ------------------------------ */
-    const enriched = posts.map((p) => ({
-      ...p,
-      userName: p.userId?.username ?? 'Anonymous',
-    }));
+    // Modify response based on anonymity
+    const enriched = posts.map((p) => {
+      const post = { ...p };
 
-    /* Meta counts ---------------------------------------------- */
+      // Remove username if post is anonymous
+      if (post.isAnonymous) {
+        if (post.userId && post.userId.username) {
+          delete post.userId.username;
+        }
+        return post; // No userName field
+      }
+
+      // Add userName field for non-anonymous posts
+      return {
+        ...post,
+        userName: post.userId?.username || 'Unknown',
+      };
+    });
+
+    // Meta counts
     const totalPosts = await Post.countDocuments();
     const lastMonthPosts = await Post.countDocuments({
       createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
@@ -200,7 +258,7 @@ export const updatePost = async (req, res, next) => {
     }
 
     /* Whitelist fields --------------------------------------- */
-    const allowed = ['title', 'content', 'category', 'images', 'geolocation'];
+    const allowed = ['title', 'content','isAnonymous', 'flag', 'category', 'images', 'geolocation', 'location',];
     allowed.forEach((field) => {
       if (req.body[field] !== undefined) {
         post[field] =
