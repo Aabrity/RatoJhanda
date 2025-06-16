@@ -11,35 +11,16 @@ export default function DashPosts() {
   const [showMore, setShowMore] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [postIdToDelete, setPostIdToDelete] = useState('');
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const res = await fetch(`/api/post/getposts?userId=${currentUser._id}`);
-        const data = await res.json();
-        if (res.ok) {
-          setUserPosts(data.posts);
-          if (data.posts.length < 9) {
-            setShowMore(false);
-          }
-        }
-      } catch (error) {
-        console.log(error.message);
-      }
-    };
-    if (currentUser.isAdmin) {
-      fetchPosts();
-    }
-  }, [currentUser._id]);
-
-  const handleShowMore = async () => {
-    const startIndex = userPosts.length;
+ useEffect(() => {
+  const fetchPosts = async () => {
     try {
-      const res = await fetch(
-        `/api/post/getposts?userId=${currentUser._id}&startIndex=${startIndex}`
-      );
+      const url = currentUser.isAdmin
+        ? `/api/post/getposts`
+        : `/api/post/getposts?userId=${currentUser._id}`;
+      const res = await fetch(url);
       const data = await res.json();
       if (res.ok) {
-        setUserPosts((prev) => [...prev, ...data.posts]);
+        setUserPosts(data.posts);
         if (data.posts.length < 9) {
           setShowMore(false);
         }
@@ -48,6 +29,29 @@ export default function DashPosts() {
       console.log(error.message);
     }
   };
+  fetchPosts();
+}, [currentUser._id, currentUser.isAdmin]);
+
+
+const handleShowMore = async () => {
+  const startIndex = userPosts.length;
+  try {
+    const url = currentUser.isAdmin
+      ? `/api/post/getposts?startIndex=${startIndex}`
+      : `/api/post/getposts?userId=${currentUser._id}&startIndex=${startIndex}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (res.ok) {
+      setUserPosts((prev) => [...prev, ...data.posts]);
+      if (data.posts.length < 9) {
+        setShowMore(false);
+      }
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
 
   const handleDeletePost = async () => {
     setShowModal(false);
