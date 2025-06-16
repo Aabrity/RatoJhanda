@@ -9,6 +9,13 @@ const { isEmail } = validator;
 // Utility: Validate ObjectId
 const validateObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
+/** Accepts http / https URLs */
+const isHttpUrl = (str = '') => /^https?:\/\/.+/i.test(str);
+
+/** Accepts a “data:image/…;base64,AAAA” string */
+const isBase64Image = (str = '') =>
+  /^data:image\/[a-z0-9.+-]+;base64,[a-z0-9+/]+=*$/i.test(str);
+
 export const test = (req, res) => {
   res.json({ message: 'API is working!' });
 };
@@ -55,14 +62,30 @@ export const updateUser = async (req, res, next) => {
       }
       updates.email = req.body.email.toLowerCase();
     }
+    // console.log(req.body.profilePicture)
 
     if (req.body.profilePicture) {
-      if (!req.body.profilePicture.startsWith('http')) {
-        return next(errorHandler(400, 'Invalid profile picture URL'));
-      }
-      updates.profilePicture = req.body.profilePicture;
-    }
+    //   if (!req.body.profilePicture.startsWith('http')) {
+    //     return next(errorHandler(400, 'Invalid profile picture URL'));
+    //   }
+    //   updates.profilePicture = req.body.profilePicture;
+    // }
+if ( !isBase64Image(req.body.profilePicture)) {
+    return next(
+      errorHandler(400, 'Profile picture must be a valid URL or base64 image')
+    );
+  }
 
+  // optional: size check for base64 (max 1 MB)
+  if (!isHttpUrl(req.body.profilePicture) && !isBase64Image(req.body.profilePicture)) {
+    const sizeInBytes = (req.body.profilePicture.length * 3) / 4; // rough calc
+    const MAX = 1 * 1024 * 1024; // 1 MB
+    if (sizeInBytes > MAX) {
+      return next(errorHandler(400, 'Base64 image too large (max 1 MB)'));
+    }
+  }
+    updates.profilePicture = req.body.profilePicture;
+    }
     const updatedUser = await User.findByIdAndUpdate(
       req.params.userId,
       { $set: updates },
