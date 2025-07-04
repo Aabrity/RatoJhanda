@@ -100,7 +100,7 @@ export default function UpdatePost() {
         ...prev,
         images: reader.result, // base64 string
       }));
-      toast.success('Image converted to Base64!');
+      toast.success('Image Uploaded Successfully!');
     };
     reader.onerror = () => {
       toast.error('Failed to read file');
@@ -247,11 +247,23 @@ export default function UpdatePost() {
         </div>
 
         {formData.images && (
-          <img
-            src={formData.images}
-            alt="uploaded"
-            className="w-full h-72 object-cover"
-          />
+          <div className="relative w-full h-72 mb-4">
+            <img
+              src={formData.images}
+              alt="uploaded"
+              className="w-full h-full object-cover rounded-md"
+            />
+            <button
+              type="button"
+              onClick={() =>
+                setFormData((prev) => ({ ...prev, images: '' }))
+              }
+              className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-red-700"
+              title="Remove image"
+            >
+              X
+            </button>
+          </div>
         )}
 
         <ReactQuill

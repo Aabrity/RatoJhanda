@@ -20,11 +20,9 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useNavigate } from 'react-router-dom';
 import slugify from 'slugify';
-// import { app } from '../firebase';  <-- Remove Firebase import
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import greenflag from '../assets/pin.png';
 import redflag from '../assets/red-flag.png';
-
 import { toast } from 'react-hot-toast';
 
 export default function CreateFlag() {
@@ -36,7 +34,6 @@ export default function CreateFlag() {
   const [position, setPosition] = useState([27.7172, 85.324]); // Kathmandu default
   const navigate = useNavigate();
 
-  // Convert image file to base64 string
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -45,11 +42,10 @@ export default function CreateFlag() {
     setUploadProgress(0);
     toast.dismiss();
 
-    // Read file as base64
     const reader = new FileReader();
 
     reader.onloadstart = () => {
-      setUploadProgress(10); // initial small progress
+      setUploadProgress(10);
       toast.loading(`Uploading image: 10%`, { id: 'upload-progress' });
     };
 
@@ -64,7 +60,7 @@ export default function CreateFlag() {
     reader.onload = () => {
       setFormData((prev) => ({
         ...prev,
-        images: reader.result, // base64 string
+        images: reader.result,
       }));
       setUploading(false);
       setUploadProgress(null);
@@ -100,7 +96,6 @@ export default function CreateFlag() {
       const dataToSend = {
         ...formData,
         slug,
-        // location,
         geolocation: {
           lat: position[0],
           lng: position[1],
@@ -175,7 +170,7 @@ export default function CreateFlag() {
   const customInputTheme = {
     field: {
       input: {
-        base: "block w-full border disabled:cursor-not-allowed disabled:opacity-50",
+        base: "block w-full border disabled:cursor-not-allowed disabled:opacity-50 ",
         colors: {
           gray: "bg-gray-50 border-gray-300 text-gray-900 focus:border-red-500 focus:ring-red-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white",
         },
@@ -262,12 +257,25 @@ export default function CreateFlag() {
           </Button>
         </div>
 
+        {/* Uploaded Image with Remove Button */}
         {formData.images && (
-          <img
-            src={formData.images}
-            alt="uploaded"
-            className="w-full h-72 object-cover"
-          />
+          <div className="relative w-full h-72 mb-4">
+            <img
+              src={formData.images}
+              alt="uploaded"
+              className="w-full h-full object-cover rounded-md"
+            />
+            <button
+              type="button"
+              onClick={() =>
+                setFormData((prev) => ({ ...prev, images: '' }))
+              }
+              className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-red-700"
+              title="Remove image"
+            >
+              X
+            </button>
+          </div>
         )}
 
         {/* Rich Text Editor */}

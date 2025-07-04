@@ -8,7 +8,7 @@ export default function About() {
           <h1 className='text-3xl font font-semibold text-center my-7'>
             About RatoJhanda
           </h1>
-          <div className='text-md text-gray-500 flex flex-col gap-6'>
+          <div className='text-md text-gray-700 dark:text-white flex flex-col gap-6'>
             <p>
              Ratoflag is a community-powered platform built to keep you safe, informed, and connected.
               In a world where important local incidents often go unnoticed, Ratoflag helps people share

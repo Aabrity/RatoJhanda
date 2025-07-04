@@ -134,7 +134,7 @@ export default function CommentSection({ postId }) {
 
       {currentUser ? (
         <div className="flex items-center gap-1 my-5 text-gray-500 text-sm">
-          <p>Signed in as:</p>
+          <p className="dark:text-white">Signed in as:</p>
           <img
             className="h-5 w-5 object-cover rounded-full"
             src={currentUser.profilePicture}
@@ -148,7 +148,7 @@ export default function CommentSection({ postId }) {
           </Link>
         </div>
       ) : (
-        <div className="text-sm text-teal-500 my-5 flex gap-1">
+        <div className="text-sm text-teal-500 my-5 flex gap-1 dark:text-white">
           You must be signed in to comment.
           <Link className="text-blue-500 hover:underline" to={'/sign-in'}>
             Sign In
@@ -172,7 +172,7 @@ export default function CommentSection({ postId }) {
             color="gray"
           />
           <div className="flex justify-between items-center mt-5">
-            <p className="text-gray-500 text-xs">
+            <p className="text-gray-500 text-xs dark:text-white">
               {200 - comment.length} characters remaining
             </p>
             <Button color="failure" type="submit">

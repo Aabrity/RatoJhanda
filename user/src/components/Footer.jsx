@@ -9,7 +9,8 @@ import {
   BsYoutube,
   BsGlobe,
 } from 'react-icons/bs';
-import logo from '../assets/logo/logo.png';
+import logoLight from '../assets/logo/logo.png'; 
+import logoDark from '../assets/logo/logow.png';   
 
 export default function FooterCom() {
   const { theme } = useSelector((state) => state.theme);
@@ -29,7 +30,7 @@ export default function FooterCom() {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <img
-                src={logo}
+                src={theme === 'dark' ? logoDark : logoLight}
                 alt="RatoFlag logo"
                 className="w-8 h-8 rounded-full object-cover"
               />
@@ -37,7 +38,7 @@ export default function FooterCom() {
                 <span className={theme === 'dark' ? 'text-white' : 'text-slate-800'}>
                   Rato
                 </span>
-                <span className="text-red-600">Flag</span>
+                <span className="text-red-600">Jhanda</span>
               </span>
             </Link>
           </div>
@@ -103,7 +104,7 @@ export default function FooterCom() {
         {/* Bottom Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6 pt-6 border-t border-gray-400/30">
           <div className="text-sm">
-            © {new Date().getFullYear()} RatoFlag. All rights reserved.
+            © {new Date().getFullYear()} RatoJhanda. All rights reserved.
           </div>
 
           <div className="flex gap-4">
