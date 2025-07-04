@@ -3,22 +3,28 @@ import { Link } from 'react-router-dom';
 
 export default function PostCard({ post }) {
   return (
-    <div className='group relative w-full border border-red-500 hover:border-2 hover:border-red-600 h-[400px] overflow-hidden rounded-lg sm:w-[400px] transition-all mx-auto'>
+    <div className="group relative w-full max-w-sm sm:max-w-md md:max-w-[400px] h-[420px] mx-auto border border-red-500 hover:border-2 hover:border-red-600 rounded-lg overflow-hidden transition-all">
       <Link to={`/post/${post.slug}`}>
         <img
           src={post.images}
-          alt='post cover'
-          className='h-[260px] w-full object-cover group-hover:h-[200px] transition-all duration-300 z-20'
+          alt="post cover"
+          className="h-[260px] w-full object-cover group-hover:h-[200px] transition-all duration-300 z-10"
         />
       </Link>
-      <div className='p-3 flex flex-col gap-2'>
-        <p className='text-lg font-semibold line-clamp-2'>{post.title}</p>
-        <span className='italic text-sm'>{post.category}</span>
-         <span className='bold text-sm'> 🏴 {post.flag}</span>
+
+      <div className="p-3 flex flex-col gap-2 h-[160px] relative">
+        <p className="text-base font-semibold line-clamp-2">{post.title}</p>
+        <span className="italic text-sm text-gray-600 dark:text-gray-300">
+          {post.category}
+        </span>
+        <span className="text-sm font-medium text-gray-800 dark:text-white">
+          🏴 {post.flag}
+        </span>
+
         
         <Link
           to={`/post/${post.slug}`}
-          className='z-10 group-hover:bottom-0 absolute bottom-[-200px] left-0 right-0 border border-red-600 text-red-600 hover:bg-red-500 hover:text-white transition-all duration-300 text-center py-2 rounded-md !rounded-tl-none m-2'
+          className="absolute left-3 right-3 bottom-0 sm:group-hover:bottom-0 sm:bottom-[-200px] transition-all duration-300 bg-white/90 border border-red-600 text-red-600 hover:bg-red-800 hover:text-white text-center py-2 rounded-md !rounded-tl-none"
         >
           Read article
         </Link>

@@ -223,7 +223,7 @@ export const signin = async (req, res, next) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'Strict',
-        maxAge: 15 * 60 * 1000, // 15 minutes
+        maxAge: 120 * 60 * 1000, // 15 minutes
       })
       .status(200)
       .json(rest);

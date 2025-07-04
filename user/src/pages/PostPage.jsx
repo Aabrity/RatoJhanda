@@ -14,7 +14,7 @@ import CommentSection from '../components/CommentSection';
 import { MapContainer, Marker, TileLayer, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { FaShare, FaFlag } from 'react-icons/fa'; // Added FaFlag for report button icon
+import { FaShare, FaFlag } from 'react-icons/fa'; 
 
 import redflag from '../assets/red-flag.png';
 import greenflag from '../assets/pin.png';
@@ -160,11 +160,11 @@ export default function PostPage() {
         <div className="flex items-center justify-between mb-4">
           <Link
             to="/"
-            className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className="text-sm text-gray-500 hover:text-gray-700 dark:text-white-200 dark:hover:text-white"
           >
             ← Back to Blog
           </Link>
-          {/* Removed old report button here */}
+         
         </div>
 
         <div className="text-center">
@@ -186,7 +186,7 @@ export default function PostPage() {
               </Link>
             ))}
           </div>
-          <div className="flex justify-center items-center text-gray-500 dark:text-gray-400 text-sm mb-4 space-x-2">
+          <div className="flex justify-center items-center text-gray-500 dark:text-white text-sm mb-4 space-x-2">
             <div className="rounded-full bg-gray-300 dark:bg-gray-700 w-6 h-6 flex items-center justify-center text-black dark:text-white">
               {post.isAnonymous
                 ? 'A'

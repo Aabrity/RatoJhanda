@@ -5,7 +5,8 @@ import { AiOutlineSearch } from 'react-icons/ai';
 import { FaMoon, FaSun } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import logo from '../assets/logo/logo.png';
+import logoLight from '../assets/logo/logo.png'; 
+import logoDark from '../assets/logo/logow.png';  
 import { toggleTheme } from '../redux/theme/themeSlice';
 import { signoutSuccess } from '../redux/user/userSlice';
 
@@ -60,7 +61,7 @@ export default function Header() {
     >
       <Link to="/" className="flex items-center space-x-2">
         <img
-          src={logo}
+          src={theme === 'dark' ? logoDark : logoLight}
           alt="RatoFlag logo"
           className="w-10 h-10 rounded-full object-cover"
         />

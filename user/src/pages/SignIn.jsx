@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { signInStart, signInSuccess, signInFailure } from "../redux/user/userSlice";
 import OAuth from "../components/OAuth";
 import comunity from "../assets/comunity.png";
-import { toast } from "react-hot-toast"; // 🆕
+import { toast } from "react-hot-toast"; 
 
 export default function SignIn() {
   const [formData, setFormData] = useState({ email: "", password: "" });
