@@ -364,69 +364,17 @@ const isPasswordStrong = (password) => {
 };
 
 // ✅ SIGNUP
-// export const signup = async (req, res, next) => {
-//   try {
-//     const safeBody = mongoSanitize(req.body);
-//     let { username, email, password } = safeBody;
-
-//     if (!username || !email || !password)
-//       return next(errorHandler(400, 'Username, email and password are required'));
-
-//     email = email.trim().toLowerCase();
-//     username = sanitizeUsername(username);
-
-//     if (!isEmail(email)) return next(errorHandler(400, 'Invalid email format'));
-//     if (!isPasswordStrong(password))
-//       return next(errorHandler(400, 'Password must include upper, lower, number & symbol'));
-
-//     const existing = await User.findOne({ email });
-//     if (existing) return next(errorHandler(409, 'Email already in use'));
-
-//     const hashedPassword = await bcryptjs.hash(password, 10);
-//     const otp = generateOTP();
-//     const otpHashed = hashOTP(otp);
-//     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 min
-
-//     const newUser = new User({
-//       username,
-//       email,
-//       password: hashedPassword,
-//       isVerified: false,
-//       otp: otpHashed,
-//       otpExpires,
-//       consentGivenAt: new Date(),
-//     });
-
-//     await newUser.save();
-//     await logActivity(newUser._id, 'User Registered', { email });
-
-//     await sendEmail(
-//       email,
-//       'Verify your email',
-//       `<p>Your OTP for verification is <b>${otp}</b>. It expires in 10 minutes.</p>`
-//     );
-
-//     res.status(201).json('Signup successful. Please verify your email.');
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-import { verifyCaptcha } from '../utils/verifyCaptcha.js';
-
-// SIGNUP
 export const signup = async (req, res, next) => {
   try {
     const safeBody = mongoSanitize(req.body);
-    let { username, email, password, captchaToken } = safeBody;
+    let { username, email, password } = safeBody;
 
-    if (!username || !email || !password || !captchaToken)
-      return next(errorHandler(400, 'All fields including CAPTCHA are required'));
-
-    const isHuman = await verifyCaptcha(captchaToken);
-    if (!isHuman) return next(errorHandler(403, 'CAPTCHA failed. Are you a robot?'));
+    if (!username || !email || !password)
+      return next(errorHandler(400, 'Username, email and password are required'));
 
     email = email.trim().toLowerCase();
     username = sanitizeUsername(username);
+
     if (!isEmail(email)) return next(errorHandler(400, 'Invalid email format'));
     if (!isPasswordStrong(password))
       return next(errorHandler(400, 'Password must include upper, lower, number & symbol'));
@@ -465,68 +413,20 @@ export const signup = async (req, res, next) => {
 };
 
 // ✅ SIGNIN
-// export const signin = async (req, res, next) => {
-//   try {
-//     const safeBody = mongoSanitize(req.body);
-//     let { email, password } = safeBody;
-
-//     if (!email || !password)
-//       return next(errorHandler(400, 'All fields are required'));
-
-//     email = email.trim().toLowerCase();
-
-//     const user = await User.findOne({ email }).select('+password');
-//     if (!user) return next(errorHandler(404, 'User not found'));
-
-//     if (!user.isVerified) return next(errorHandler(403, 'Verify your email first'));
-
-//     const isMatch = await bcryptjs.compare(password, user.password);
-//     if (!isMatch) {
-//       await logActivity(user._id, 'Failed Login Attempt', { email });
-//       return next(errorHandler(400, 'Invalid credentials.'));
-//     }
-
-//     const token = jwt.sign(
-//       { id: user._id, isAdmin: user.isAdmin },
-//       process.env.JWT_SECRET,
-//       { expiresIn: '2h' }
-//     );
-
-//     await logActivity(user._id, 'User Logged In', { email });
-
-//     const { password: _, ...rest } = user._doc;
-//     res
-//       .status(200)
-//       .cookie('access_token', token, {
-//         httpOnly: true,
-//         secure: process.env.NODE_ENV === 'production',
-//         sameSite: 'Strict',
-//       })
-//       .json(rest);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
-// SIGNIN
 export const signin = async (req, res, next) => {
   try {
     const safeBody = mongoSanitize(req.body);
-    let { email, password, captchaToken } = safeBody;
+    let { email, password } = safeBody;
 
-    if (!email || !password || !captchaToken)
-      return next(errorHandler(400, 'All fields including CAPTCHA are required'));
-
-    const isHuman = await verifyCaptcha(captchaToken);
-    if (!isHuman) return next(errorHandler(403, 'CAPTCHA failed. Try again.'));
+    if (!email || !password)
+      return next(errorHandler(400, 'All fields are required'));
 
     email = email.trim().toLowerCase();
 
     const user = await User.findOne({ email }).select('+password');
     if (!user) return next(errorHandler(404, 'User not found'));
 
-    if (!user.isVerified)
-      return next(errorHandler(403, 'Verify your email first'));
+    if (!user.isVerified) return next(errorHandler(403, 'Verify your email first'));
 
     const isMatch = await bcryptjs.compare(password, user.password);
     if (!isMatch) {
