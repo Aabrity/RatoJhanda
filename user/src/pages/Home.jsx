@@ -1,12 +1,12 @@
 
 "use client";
 
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import PostCard from "../components/PostCard";
-import { FaBook, FaGlobe, FaShieldAlt, FaFlag } from "react-icons/fa";
-import tree from "../assets/tree.png";
+import { FaBook, FaFlag, FaGlobe, FaShieldAlt } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import people from "../assets/pinkpeo.png";
+import tree from "../assets/tree.png";
+import PostCard from "../components/PostCard";
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
@@ -30,17 +30,19 @@ export default function Home() {
             <h1 className="text-2xl md:text-3xl font-bold dark:text-white">
               Welcome to RatoFlag
             </h1>
-            <p className="text-sm md:text-base text-gray-700 dark:text-gray-300">
-              RatoFlag is a platform where citizens can report issues they encounter 
-              in their locality and ensure about a solution. From potholes to broken 
-              streetlights, garbage dumps to water leaks — we connect you with concerned 
-              authorities and empower your voice for safer neighborhoods.
-            </p>
+        <p className="whitespace-pre text-sm md:text-base text-gray-700 dark:text-gray-300">
+  RatoFlag is  a platform  where citizens  can  report issues they <br />
+  encounter in  their  locality and ensure  about a solution. From <br />
+  potholes to broken streetlights, garbage dumps to water leaks <br />
+  we connect you with concerned authorities  and empower your <br />
+  voice for safer neighborhoods.
+</p>
+
             <div className="flex justify-center lg:justify-start">
               <img
                 src={tree}
                 alt="Colorful tree illustration"
-                className="w-40 sm:w-48 md:w-52 lg:w-60 h-auto object-contain"
+                className="w-40 sm:w-48 md:w-52 lg:w-60 h-auto object-contain ml-24" 
               />
             </div>
           </div>

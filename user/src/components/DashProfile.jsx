@@ -2,22 +2,21 @@
 "use client"
 
 import { Button, Modal, TextInput } from "flowbite-react"
-import { useEffect, useRef, useState } from "react"
-import { useSelector, useDispatch } from "react-redux"
-import {
-  updateStart,
-  updateSuccess,
-  updateFailure,
-  deleteUserStart,
-  deleteUserSuccess,
-  deleteUserFailure,
-  signoutSuccess,
-} from "../redux/user/userSlice"
+import { useRef, useState } from "react"
 import { CircularProgressbar } from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
-import { HiOutlineExclamationCircle, HiCamera, HiUser, HiMail, HiLockClosed } from "react-icons/hi"
-import { Link } from "react-router-dom"
 import { toast, Toaster } from "react-hot-toast"
+import { HiCamera, HiLockClosed, HiMail, HiUser } from "react-icons/hi"
+import { useDispatch, useSelector } from "react-redux"
+import {
+  deleteUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  signoutSuccess,
+  updateFailure,
+  updateStart,
+  updateSuccess,
+} from "../redux/user/userSlice"
 
 const customStyles = `
   .flowbite-button[data-testid="flowbite-button"] {
@@ -46,40 +45,78 @@ export default function DashProfile() {
   const [formData, setFormData] = useState({})
   const [showModal, setShowModal] = useState(false)
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error("Image must be less than 2MB")
-        return
-      }
+  // const handleImageChange = (e) => {
+  //   const file = e.target.files[0]
+  //   if (file) {
+  //     if (file.size > 2 * 1024 * 1024) {
+  //       toast.error("Image must be less than 2MB")
+  //       return
+  //     }
 
-      setImageFileUploading(true)
-      setImageFileUploadProgress(0)
+  //     setImageFileUploading(true)
+  //     setImageFileUploadProgress(0)
 
-      const reader = new FileReader()
-      reader.onloadstart = () => setImageFileUploadProgress(10)
-      reader.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const progress = Math.round((event.loaded / event.total) * 100)
-          setImageFileUploadProgress(progress)
-        }
-      }
-      reader.onload = () => {
-        const base64String = reader.result
-        setImageBase64(base64String)
-        setFormData({ ...formData, profilePicture: base64String })
-        setImageFileUploadProgress(100)
-        setImageFileUploading(false)
-      }
-      reader.onerror = () => {
-        toast.error("Failed to read image file")
-        setImageFileUploading(false)
-        setImageFileUploadProgress(null)
-      }
-      reader.readAsDataURL(file)
-    }
+  //     const reader = new FileReader()
+  //     reader.onloadstart = () => setImageFileUploadProgress(10)
+  //     reader.onprogress = (event) => {
+  //       if (event.lengthComputable) {
+  //         const progress = Math.round((event.loaded / event.total) * 100)
+  //         setImageFileUploadProgress(progress)
+  //       }
+  //     }
+  //     reader.onload = () => {
+  //       const base64String = reader.result
+  //       setImageBase64(base64String)
+  //       setFormData({ ...formData, profilePicture: base64String })
+  //       setImageFileUploadProgress(100)
+  //       setImageFileUploading(false)
+  //     }
+  //     reader.onerror = () => {
+  //       toast.error("Failed to read image file")
+  //       setImageFileUploading(false)
+  //       setImageFileUploadProgress(null)
+  //     }
+  //     reader.readAsDataURL(file)
+  //   }
+  // }
+const handleImageChange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    toast.error("Image must be less than 2MB");
+    return;
   }
+
+  setImageFileUploading(true);
+  setImageFileUploadProgress(10);
+
+  const formData = new FormData();
+  formData.append("profilePicture", file);
+
+  try {
+    const res = await fetch(`/api/user/profile-picture/${currentUser._id}`, {
+      method: "PUT",
+      body: formData,
+      credentials: "include",
+    });
+
+    const data = await res.json();
+    setImageFileUploadProgress(100);
+    setImageFileUploading(false);
+
+    if (!res.ok) {
+      toast.error(data.message || "Failed to upload image");
+    } else {
+      toast.success("Profile picture uploaded!");
+      // update Redux state
+      dispatch(updateSuccess(data.user)); // ⬅️ use `data.user` from response
+    }
+  } catch (error) {
+    toast.error("Upload failed: " + error.message);
+    setImageFileUploading(false);
+  }
+};
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value })
@@ -188,7 +225,7 @@ export default function DashProfile() {
                     />
                   )}
                   <img
-                    src={imageBase64 || currentUser.profilePicture}
+                    src={imageBase64 || `/uploads/${currentUser.profilePicture}`}
                     alt="Profile"
                     className={`w-full h-full object-cover ${imageFileUploadProgress && imageFileUploadProgress < 100 && "opacity-60"}`}
                   />

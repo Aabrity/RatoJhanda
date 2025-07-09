@@ -1,23 +1,16 @@
 
-import { Select } from 'flowbite-react';
-import {
-  Button,
-  Spinner,
-  Modal,
-  Textarea,
-  TextInput,
-} from 'flowbite-react';
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import CommentSection from '../components/CommentSection';
-import { MapContainer, Marker, TileLayer, Popup } from 'react-leaflet';
+import { Button, Modal, Select, Spinner, Textarea } from 'flowbite-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { FaShare, FaFlag } from 'react-icons/fa'; 
+import { useEffect, useState } from 'react';
+import { FaFlag, FaShare } from 'react-icons/fa';
+import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import { useSelector } from 'react-redux';
+import { Link, useParams } from 'react-router-dom';
+import CommentSection from '../components/CommentSection';
 
-import redflag from '../assets/red-flag.png';
 import greenflag from '../assets/pin.png';
+import redflag from '../assets/red-flag.png';
 
 const redFlagIcon = new L.Icon({
   iconUrl: redflag,
@@ -207,7 +200,7 @@ export default function PostPage() {
 
         {post.images && (
           <img
-            src={post.images}
+            src={`/uploads/${post.images}`}
             alt={post.title}
             className="w-full rounded-lg shadow-md mb-6"
           />
@@ -224,26 +217,43 @@ export default function PostPage() {
               📍 Location <br /> {post.location}
             </h2>
             <div className="relative">
-              <MapContainer
-                center={[post.geolocation.lat, post.geolocation.lng]}
-                zoom={14}
-                scrollWheelZoom={false}
-                className="h-64 w-full"
-                dragging={false}
-                doubleClickZoom={false}
-                zoomControl={false}
-              >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
-                <Marker
-                  position={[post.geolocation.lat, post.geolocation.lng]}
-                  icon={markerIcon}
-                >
-                  <Popup>{post.location || 'Location'}</Popup>
-                </Marker>
-              </MapContainer>
+            <div className="relative group">
+  <MapContainer
+    center={[post.geolocation.lat, post.geolocation.lng]}
+    zoom={14}
+    scrollWheelZoom={false}
+    className="h-64 w-full"
+    dragging={false}
+    doubleClickZoom={false}
+    zoomControl={false}
+  >
+    <TileLayer
+      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    />
+    <Marker
+      position={[post.geolocation.lat, post.geolocation.lng]}
+      icon={markerIcon}
+    >
+      <Popup>{post.location || 'Location'}</Popup>
+    </Marker>
+  </MapContainer>
+
+  {/* Full map clickable overlay */}
+  <a
+    href={`https://www.google.com/maps?q=${post.geolocation.lat},${post.geolocation.lng}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    title="Open in Google Maps"
+    className="absolute inset-0 z-10"
+  >
+    {/* Optional hover overlay */}
+    <div className="hidden group-hover:flex items-center justify-center absolute inset-0 bg-black bg-opacity-30 text-white font-semibold">
+      Click to open in Google Maps
+    </div>
+  </a>
+</div>
+
               <div className="absolute bottom-2 right-2 bg-gray-100 dark:bg-gray-700 bg-opacity-75 rounded p-1 text-xs">
                 <a
                   href={`https://www.google.com/maps?q=${post.geolocation.lat},${post.geolocation.lng}`}
