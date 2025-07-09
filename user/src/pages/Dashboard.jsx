@@ -8,6 +8,7 @@ import DashComments from '../components/DashComments';
 import DashboardComp from '../components/DashboardComp';
 import ShowPosts from '../components/DashShowPosts';
 import DashReports from '../components/Reports' 
+import AdminLogsPage from '../components/adminlogs';
 
 export default function Dashboard() {
   const location = useLocation();
@@ -39,6 +40,7 @@ export default function Dashboard() {
       {tab === 'dash' && <DashboardComp />}
         {/* dashboard comp */}
       {tab === 'reports' && <DashReports />}
+      {tab === 'logs' && <AdminLogsPage />}
     </div>
   );
 }

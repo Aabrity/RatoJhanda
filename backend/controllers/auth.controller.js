@@ -1,22 +1,74 @@
-// // SECURED auth.controller.js
-// import User from '../models/user.model.js';
+
 // import bcryptjs from 'bcryptjs';
-// import { errorHandler } from '../utils/error.js';
-// import jwt from 'jsonwebtoken';
 // import crypto from 'crypto';
-// import { sendEmail } from '../utils/sendEmail.js';
+// import jwt from 'jsonwebtoken';
 // import nodemailer from 'nodemailer';
+// import validator from 'validator';
+// import User from '../models/user.model.js';
+// import { errorHandler } from '../utils/error.js';
+// import { sanitizeEmailInput } from '../utils/sanitize.js';
+// import { sendEmail } from '../utils/sendEmail.js';
+// import { logActivity } from '../utils/loggers.js'; 
 
-// // Helper
-// function generateOTP() {
-//   return Math.floor(100000 + Math.random() * 900000).toString();
-// }
+// const { isEmail } = validator;
 
-// // Signin
+// const generateOTP = () => crypto.randomInt(100000, 999999).toString();
+// const hashOTP = (otp) => crypto.createHash('sha256').update(otp).digest('hex');
+
+// const isPasswordStrong = (password) => {
+//   const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_\-+=])[A-Za-z\d@$!%*?&#^()_\-+=]{8,}$/;
+//   return strongPasswordRegex.test(password);
+// };
+
+// // ✅ SIGNUP
+// export const signup = async (req, res, next) => {
+//   try {
+//     const { username, email, password } = req.body;
+//     if (!username || !email || !password)
+//       return next(errorHandler(400, 'Username, email and password are required'));
+//     if (!isEmail(email)) return next(errorHandler(400, 'Invalid email format'));
+//     if (!isPasswordStrong(password))
+//       return next(errorHandler(400, 'Password must include upper, lower, number & symbol'));
+
+//     const existing = await User.findOne({ email });
+//     if (existing) return next(errorHandler(409, 'Email already in use'));
+
+//     const hashedPassword = await bcryptjs.hash(password, 10);
+//     const otp = generateOTP();
+//     const otpHashed = hashOTP(otp);
+//     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+
+//     const newUser = new User({
+//       username,
+//       email,
+//       password: hashedPassword,
+//       isVerified: false,
+//       otp: otpHashed,
+//       otpExpires,
+//       consentGivenAt: new Date(),
+//     });
+
+//     await newUser.save();
+//     await logActivity(newUser._id, 'User Registered', { email });
+
+//     await sendEmail(
+//       email,
+//       'Verify your email',
+//       `<p>Your OTP for verification is <b>${otp}</b>. It expires in 10 minutes.</p>`
+//     );
+
+//     res.status(201).json('Signup successful. Please verify your email.');
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+// // ✅ SIGNIN
 // export const signin = async (req, res, next) => {
 //   try {
 //     const { email, password } = req.body;
-//     if (!email || !password) return next(errorHandler(400, 'All fields are required'));
+//     if (!email || !password)
+//       return next(errorHandler(400, 'All fields are required'));
 
 //     const user = await User.findOne({ email }).select('+password');
 //     if (!user) return next(errorHandler(404, 'User not found'));
@@ -24,7 +76,10 @@
 //     if (!user.isVerified) return next(errorHandler(403, 'Verify your email first'));
 
 //     const isMatch = await bcryptjs.compare(password, user.password);
-//     if (!isMatch) return next(errorHandler(400, 'Invalid password'));
+//     if (!isMatch) {
+//       await logActivity(user._id, 'Failed Login Attempt', { email });
+//       return next(errorHandler(400, 'Invalid credentials.'));
+//     }
 
 //     const token = jwt.sign(
 //       { id: user._id, isAdmin: user.isAdmin },
@@ -32,51 +87,35 @@
 //       { expiresIn: '2h' }
 //     );
 
-//     const { password: pass, ...rest } = user._doc;
-//     res
-//       .status(200)
-//       .cookie('access_token', token, { httpOnly: true, secure: true, sameSite: 'Strict' })
-//       .json(rest);
+//     await logActivity(user._id, 'User Logged In', { email });
+
+//     const { password: _, ...rest } = user._doc;
+//     res.status(200).cookie('access_token', token, {
+//       httpOnly: true,
+//       secure: true,
+//       sameSite: 'Strict',
+//     }).json(rest);
 //   } catch (error) {
 //     next(error);
 //   }
 // };
 
-// // Signup
-// export const signup = async (req, res, next) => {
-//   try {
-//     const { username, email, password } = req.body;
-//     if (!username || !email || !password) return next(errorHandler(400, 'All fields are required'));
-
-//     const hashedPassword = await bcryptjs.hash(password, 12);
-//     const otp = generateOTP();
-//     const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
-
-//     const newUser = new User({ username, email, password: hashedPassword, isVerified: false, otp, otpExpires });
-//     await newUser.save();
-
-//     await sendEmail(email, 'Verify your email', `<p>Your OTP is <b>${otp}</b></p>`);
-//     res.json('Signup successful. Please verify your email using the OTP.');
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
-// // Verify Email
+// // ✅ EMAIL VERIFICATION
 // export const verifyEmail = async (req, res, next) => {
 //   try {
 //     const { email, otp } = req.body;
 //     if (!email || !otp) return next(errorHandler(400, 'Email and OTP required'));
 
-//     const user = await User.findOne({ email });
-//     if (!user || user.otp !== otp || user.otpExpires < new Date()) {
+//     const user = await User.findOne({ email }).select('+otp +otpExpires');
+//     if (!user || user.otp !== hashOTP(otp) || user.otpExpires < Date.now())
 //       return next(errorHandler(400, 'Invalid or expired OTP'));
-//     }
 
 //     user.isVerified = true;
 //     user.otp = undefined;
 //     user.otpExpires = undefined;
 //     await user.save();
+
+//     await logActivity(user._id, 'Email Verified', { email });
 
 //     res.status(200).json('Email verified successfully');
 //   } catch (error) {
@@ -84,82 +123,201 @@
 //   }
 // };
 
-// // Request Password Reset
+// // ✅ REQUEST PASSWORD RESET
 // export const requestPasswordReset = async (req, res, next) => {
 //   try {
 //     const { email } = req.body;
-//     if (!email) return next(errorHandler(400, 'Email is required'));
+//     if (!email || !isEmail(email)) return next(errorHandler(400, 'Valid email required'));
 
 //     const user = await User.findOne({ email });
-//     if (!user) return next(errorHandler(404, 'User not found'));
+//     if (!user) return res.status(200).json({ success: true, message: 'If this email exists, an OTP has been sent' });
 
 //     const otp = generateOTP();
-//     user.resetPasswordOTP = otp;
-//     user.resetPasswordOTPExpiry = Date.now() + 10 * 60 * 1000;
+//     const hashedOtp = hashOTP(otp);
+//     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+//     user.resetPasswordOTP = hashedOtp;
+//     user.resetPasswordOTPExpiry = otpExpiry;
 //     await user.save();
 
-//     await sendEmail(user.email, 'Your OTP', `Your OTP is ${otp}. Valid for 10 minutes.`);
-//     res.json({ success: true, message: 'OTP sent' });
+//     await sendEmail(email, 'Password Reset OTP', `<p>Your OTP is <b>${otp}</b></p>`);
+
+//     await logActivity(user._id, 'Password Reset Requested', { email });
+
+//     res.status(200).json({ success: true, message: 'If this email exists, an OTP has been sent' });
 //   } catch (error) {
 //     next(error);
 //   }
 // };
 
-// // Reset Password
+// // ✅ RESET PASSWORD
 // export const resetPassword = async (req, res, next) => {
 //   try {
 //     const { email, otp, newPassword } = req.body;
-//     if (!email || !otp || !newPassword) return next(errorHandler(400, 'All fields are required'));
 
-//     const user = await User.findOne({ email });
-//     if (!user || user.resetPasswordOTP !== otp || user.resetPasswordOTPExpiry < Date.now()) {
+//     if (!email || !otp || !newPassword)
+//       return next(errorHandler(400, 'All fields are required'));
+//     if (!isPasswordStrong(newPassword))
+//       return next(errorHandler(400, 'Weak password'));
+
+//     const user = await User.findOne({ email }).select(
+//       '+resetPasswordOTP +resetPasswordOTPExpiry +password +oldPasswords'
+//     );
+//     if (!user) return next(errorHandler(400, 'Invalid or expired OTP'));
+
+//     const hashedOtpInput = hashOTP(otp);
+//     if (
+//       !user.resetPasswordOTP ||
+//       hashedOtpInput !== user.resetPasswordOTP ||
+//       user.resetPasswordOTPExpiry < Date.now()
+//     ) {
 //       return next(errorHandler(400, 'Invalid or expired OTP'));
 //     }
 
-//     user.password = await bcryptjs.hash(newPassword, 12);
+//     for (const oldHashed of user.oldPasswords || []) {
+//       if (await bcryptjs.compare(newPassword, oldHashed)) {
+//         return next(errorHandler(400, 'You cannot reuse a recent password.'));
+//       }
+//     }
+
+//     const hashedNewPassword = await bcryptjs.hash(newPassword, 10);
+//     user.oldPasswords = [user.password, ...(user.oldPasswords || [])].slice(0, 5);
+//     user.password = hashedNewPassword;
+//     user.passwordChangedAt = new Date();
 //     user.resetPasswordOTP = undefined;
 //     user.resetPasswordOTPExpiry = undefined;
+
 //     await user.save();
 
-//     res.json({ success: true, message: 'Password reset successful' });
+//     await logActivity(user._id, 'Password Reset Successful', { email });
+
+//     res.status(200).json({ success: true, message: 'Password reset successful' });
 //   } catch (error) {
 //     next(error);
 //   }
 // };
 
-// // Google Auth
+// // ✅ LOGOUT
+// export const logout = async (req, res, next) => {
+//   await logActivity(req.user?.id || 'Unknown', 'User Logged Out');
+//   res.clearCookie('access_token', {
+//     httpOnly: true,
+//     secure: process.env.NODE_ENV === 'production',
+//     sameSite: 'Strict',
+//   }).status(200).json({
+//     success: true,
+//     message: 'Logged out successfully',
+//     timestamp: new Date().toISOString(),
+//   });
+// };
+
+// // ✅ GOOGLE AUTH
+// // export const google = async (req, res, next) => {
+// //   try {
+// //     const { email, name, googlePhotoUrl } = req.body;
+// //     if (!email || !name || !googlePhotoUrl)
+// //       return next(errorHandler(400, 'Incomplete Google account data'));
+
+// //     let user = await User.findOne({ email });
+// //     if (!user) {
+// //       const tempPass = crypto.randomBytes(16).toString('hex');
+// //       const hashedPassword = await bcryptjs.hash(tempPass, 10);
+// //       const username = `${name.toLowerCase().replace(/\s/g, '')}_${Math.floor(Math.random() * 10000)}`;
+
+// //       user = new User({
+// //         username,
+// //         email,
+// //         password: hashedPassword,
+// //         profilePicture: googlePhotoUrl,
+// //         isVerified: true,
+// //         consentGivenAt: new Date(),
+// //       });
+
+// //       await user.save();
+// //     }
+
+// //     const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, process.env.JWT_SECRET, {
+// //       expiresIn: '15m',
+// //     });
+
+// //     const { password, otp, otpExpires, resetPasswordOTP, resetPasswordOTPExpiry, ...userData } = user._doc;
+
+// //     await logActivity(user._id, 'Google OAuth Sign In', { email });
+
+// //     res.cookie('access_token', token, {
+// //       httpOnly: true,
+// //       secure: process.env.NODE_ENV === 'production',
+// //       sameSite: 'Strict',
+// //     }).status(200).json(userData);
+// //   } catch (error) {
+// //     next(error);
+// //   }
+// // };
 // export const google = async (req, res, next) => {
 //   try {
-//     const { email, name, googlePhotoUrl } = req.body;
-//     let user = await User.findOne({ email });
+//     const { email, name } = req.body; // Removed googlePhotoUrl
+//     if (!email || !name)
+//       return next(errorHandler(400, 'Incomplete Google account data'));
 
+//     let user = await User.findOne({ email });
 //     if (!user) {
 //       const tempPass = crypto.randomBytes(16).toString('hex');
-//       const hashedPassword = await bcryptjs.hash(tempPass, 12);
+//       const hashedPassword = await bcryptjs.hash(tempPass, 10);
+//       const username = `${name.toLowerCase().replace(/\s/g, '')}_${Math.floor(Math.random() * 10000)}`;
+
 //       user = new User({
-//         username: `${name.toLowerCase().replace(/\s/g, '')}_${Math.floor(Math.random() * 10000)}`,
+//         username,
 //         email,
 //         password: hashedPassword,
-//         profilePicture: googlePhotoUrl,
+//         // profilePicture: googlePhotoUrl, ← removed this line
 //         isVerified: true,
+//         consentGivenAt: new Date(),
 //       });
+
 //       await user.save();
 //     }
 
-//     const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, process.env.JWT_SECRET, { expiresIn: '2h' });
-//     const { password, ...rest } = user._doc;
+//     const token = jwt.sign(
+//       { id: user._id, isAdmin: user.isAdmin },
+//       process.env.JWT_SECRET,
+//       { expiresIn: '15m' }
+//     );
 
-//     res.cookie('access_token', token, { httpOnly: true, secure: true, sameSite: 'Strict' }).status(200).json(rest);
+//     const {
+//       password,
+//       otp,
+//       otpExpires,
+//       resetPasswordOTP,
+//       resetPasswordOTPExpiry,
+//       ...userData
+//     } = user._doc;
+
+//     await logActivity(user._id, 'Google OAuth Sign In', { email });
+
+//     res
+//       .cookie('access_token', token, {
+//         httpOnly: true,
+//         secure: process.env.NODE_ENV === 'production',
+//         sameSite: 'Strict',
+//       })
+//       .status(200)
+//       .json(userData);
 //   } catch (error) {
 //     next(error);
 //   }
 // };
 
-// // Send Contact Email
+
+// // ✅ CONTACT FORM (No logging needed)
 // export const sendContactEmail = async (req, res, next) => {
 //   try {
-//     const { userEmail, subject, message } = req.body;
-//     if (!userEmail || !subject || !message) return next(errorHandler(400, 'All fields required'));
+//     let { userEmail, subject, message } = req.body;
+//     if (!userEmail || !subject || !message)
+//       return next(errorHandler(400, 'All fields are required'));
+//     if (!isEmail(userEmail)) return next(errorHandler(400, 'Invalid email'));
+
+//     subject = sanitizeEmailInput(subject);
+//     message = sanitizeEmailInput(message);
 
 //     const transporter = nodemailer.createTransport({
 //       service: 'gmail',
@@ -173,7 +331,7 @@
 //       from: userEmail,
 //       to: process.env.EMAIL_USER,
 //       subject: `Contact Form: ${subject}`,
-//       text: `From: ${userEmail}\n${message}`,
+//       text: `From: ${userEmail}\n\n${message}`,
 //     });
 
 //     res.status(200).json({ success: true, message: 'Email sent successfully' });
@@ -181,72 +339,53 @@
 //     next(error);
 //   }
 // };
-
-import User from '../models/user.model.js';
 import bcryptjs from 'bcryptjs';
-import { errorHandler } from '../utils/error.js';
-import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { sendEmail } from '../utils/sendEmail.js';
+import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import validator from 'validator';
+import mongoSanitize from 'mongo-sanitize';
+
+import User from '../models/user.model.js';
+import { errorHandler } from '../utils/error.js';
+import { sanitizeEmailInput, sanitizeUsername } from '../utils/sanitize.js';
+import { sendEmail } from '../utils/sendEmail.js';
+import { logActivity } from '../utils/loggers.js';
+
 const { isEmail } = validator;
 
-// Helpers
 const generateOTP = () => crypto.randomInt(100000, 999999).toString();
 const hashOTP = (otp) => crypto.createHash('sha256').update(otp).digest('hex');
 
-// Sign In
-export const signin = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) return next(errorHandler(400, 'All fields are required'));
-    if (!isEmail(email)) return next(errorHandler(400, 'Invalid email format'));
-
-    const user = await User.findOne({ email }).select('+password');
-    if (!user || !user.password) return next(errorHandler(400, 'Invalid credentials'));
-
-    if (!user.isVerified) return next(errorHandler(403, 'Verify your email first'));
-
-    const isMatch = await bcryptjs.compare(password, user.password);
-    if (!isMatch) return next(errorHandler(400, 'Invalid credentials'));
-
-    const token = jwt.sign(
-      { id: user._id, isAdmin: user.isAdmin },
-      process.env.JWT_SECRET,
-      { expiresIn: '15m' }
-    );
-
-    const { password: pass, ...rest } = user._doc;
-    res
-      .cookie('access_token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Strict',
-        maxAge: 120 * 60 * 1000, // 15 minutes
-      })
-      .status(200)
-      .json(rest);
-  } catch (error) {
-    next(error);
-  }
+const isPasswordStrong = (password) => {
+  const strongPasswordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_\-+=])[A-Za-z\d@$!%*?&#^()_\-+=]{8,}$/;
+  return strongPasswordRegex.test(password);
 };
 
-// Sign Up
+// ✅ SIGNUP
 export const signup = async (req, res, next) => {
   try {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) return next(errorHandler(400, 'All fields are required'));
+    const safeBody = mongoSanitize(req.body);
+    let { username, email, password } = safeBody;
+
+    if (!username || !email || !password)
+      return next(errorHandler(400, 'Username, email and password are required'));
+
+    email = email.trim().toLowerCase();
+    username = sanitizeUsername(username);
+
     if (!isEmail(email)) return next(errorHandler(400, 'Invalid email format'));
-    if (password.length < 6) return next(errorHandler(400, 'Password must be at least 6 characters'));
+    if (!isPasswordStrong(password))
+      return next(errorHandler(400, 'Password must include upper, lower, number & symbol'));
 
     const existing = await User.findOne({ email });
     if (existing) return next(errorHandler(409, 'Email already in use'));
 
-    const hashedPassword = await bcryptjs.hash(password, 12);
+    const hashedPassword = await bcryptjs.hash(password, 10);
     const otp = generateOTP();
     const otpHashed = hashOTP(otp);
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 min
 
     const newUser = new User({
       username,
@@ -255,43 +394,89 @@ export const signup = async (req, res, next) => {
       isVerified: false,
       otp: otpHashed,
       otpExpires,
-      consentGivenAt: new Date()
+      consentGivenAt: new Date(),
     });
 
     await newUser.save();
-    await sendEmail(email, 'Verify your email', `<p>Your OTP is <b>${otp}</b>. It is valid for 10 minutes.</p>`);
-    res.status(201).json('Signup successful. Please verify your email using the OTP.');
+    await logActivity(newUser._id, 'User Registered', { email });
+
+    await sendEmail(
+      email,
+      'Verify your email',
+      `<p>Your OTP for verification is <b>${otp}</b>. It expires in 10 minutes.</p>`
+    );
+
+    res.status(201).json('Signup successful. Please verify your email.');
   } catch (error) {
     next(error);
   }
 };
 
-// Verify Email
-export const verifyEmail = async (req, res, next) => {
-  
+// ✅ SIGNIN
+export const signin = async (req, res, next) => {
   try {
-    const { email, otp } = req.body;
+    const safeBody = mongoSanitize(req.body);
+    let { email, password } = safeBody;
+
+    if (!email || !password)
+      return next(errorHandler(400, 'All fields are required'));
+
+    email = email.trim().toLowerCase();
+
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) return next(errorHandler(404, 'User not found'));
+
+    if (!user.isVerified) return next(errorHandler(403, 'Verify your email first'));
+
+    const isMatch = await bcryptjs.compare(password, user.password);
+    if (!isMatch) {
+      await logActivity(user._id, 'Failed Login Attempt', { email });
+      return next(errorHandler(400, 'Invalid credentials.'));
+    }
+
+    const token = jwt.sign(
+      { id: user._id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET,
+      { expiresIn: '2h' }
+    );
+
+    await logActivity(user._id, 'User Logged In', { email });
+
+    const { password: _, ...rest } = user._doc;
+    res
+      .status(200)
+      .cookie('access_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+      })
+      .json(rest);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ✅ EMAIL VERIFICATION
+export const verifyEmail = async (req, res, next) => {
+  try {
+    const safeBody = mongoSanitize(req.body);
+    let { email, otp } = safeBody;
+
     if (!email || !otp) return next(errorHandler(400, 'Email and OTP required'));
 
-//     const user = await User.findOne({ email });
-//     console.log('otpExpires:', user.otpExpires);
-// console.log('otpExpires timestamp:', user.otpExpires.getTime());
-// console.log('Date.now():', Date.now());
-// console.log('otpHashes match:', user.otp === hashOTP(otp));
+    email = email.trim().toLowerCase();
+    otp = otp.trim();
 
-//     if (!user || user.otp !== hashOTP(otp) || user.otpExpires.getTime() < Date.now()) {
-//       return next(errorHandler(400, 'Invalid or expired OTP'));
-//     }
-const user = await User.findOne({ email }).select('+otp +otpExpires');
-if (!user || user.otp !== hashOTP(otp) || user.otpExpires.getTime() < Date.now()) {
-  return next(errorHandler(400, 'Invalid or expired OTP'));
-}
-
+    const user = await User.findOne({ email }).select('+otp +otpExpires');
+    if (!user || user.otp !== hashOTP(otp) || user.otpExpires < Date.now())
+      return next(errorHandler(400, 'Invalid or expired OTP'));
 
     user.isVerified = true;
     user.otp = undefined;
     user.otpExpires = undefined;
     await user.save();
+
+    await logActivity(user._id, 'Email Verified', { email });
 
     res.status(200).json('Email verified successfully');
   } catch (error) {
@@ -299,48 +484,84 @@ if (!user || user.otp !== hashOTP(otp) || user.otpExpires.getTime() < Date.now()
   }
 };
 
-// Request Password Reset
+// ✅ REQUEST PASSWORD RESET
 export const requestPasswordReset = async (req, res, next) => {
   try {
-    const { email } = req.body;
+    const safeBody = mongoSanitize(req.body);
+    let { email } = safeBody;
+
     if (!email || !isEmail(email)) return next(errorHandler(400, 'Valid email required'));
+    email = email.trim().toLowerCase();
 
     const user = await User.findOne({ email });
-    if (!user) return next(errorHandler(200, 'If this email exists, an OTP has been sent')); // Prevent enumeration
+    if (!user)
+      return res
+        .status(200)
+        .json({ success: true, message: 'If this email exists, an OTP has been sent' });
 
     const otp = generateOTP();
-    user.resetPasswordOTP = hashOTP(otp);
-    user.resetPasswordOTPExpiry = Date.now() + 10 * 60 * 1000;
+    const hashedOtp = hashOTP(otp);
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    user.resetPasswordOTP = hashedOtp;
+    user.resetPasswordOTPExpiry = otpExpiry;
     await user.save();
 
-    await sendEmail(user.email, 'Password Reset OTP', `<p>Your OTP is <b>${otp}</b>. Valid for 10 minutes.</p>`);
+    await sendEmail(email, 'Password Reset OTP', `<p>Your OTP is <b>${otp}</b></p>`);
+
+    await logActivity(user._id, 'Password Reset Requested', { email });
+
     res.status(200).json({ success: true, message: 'If this email exists, an OTP has been sent' });
   } catch (error) {
     next(error);
   }
 };
 
-// Reset Password
+// ✅ RESET PASSWORD
 export const resetPassword = async (req, res, next) => {
   try {
-    const { email, otp, newPassword } = req.body;
-    if (!email || !otp || !newPassword) return next(errorHandler(400, 'All fields are required'));
+    const safeBody = mongoSanitize(req.body);
+    let { email, otp, newPassword } = safeBody;
 
-    const user = await User.findOne({ email });
+    if (!email || !otp || !newPassword)
+      return next(errorHandler(400, 'All fields are required'));
+
+    email = email.trim().toLowerCase();
+    otp = otp.trim();
+
+    if (!isPasswordStrong(newPassword))
+      return next(errorHandler(400, 'Weak password'));
+
+    const user = await User.findOne({ email }).select(
+      '+resetPasswordOTP +resetPasswordOTPExpiry +password +oldPasswords'
+    );
+    if (!user) return next(errorHandler(400, 'Invalid or expired OTP'));
+
+    const hashedOtpInput = hashOTP(otp);
     if (
-      !user ||
-      user.resetPasswordOTP !== hashOTP(otp) ||
+      !user.resetPasswordOTP ||
+      hashedOtpInput !== user.resetPasswordOTP ||
       user.resetPasswordOTPExpiry < Date.now()
     ) {
       return next(errorHandler(400, 'Invalid or expired OTP'));
     }
 
-    if (newPassword.length < 6) return next(errorHandler(400, 'Password must be at least 6 characters'));
+    for (const oldHashed of user.oldPasswords || []) {
+      if (await bcryptjs.compare(newPassword, oldHashed)) {
+        return next(errorHandler(400, 'You cannot reuse a recent password.'));
+      }
+    }
 
-    user.password = await bcryptjs.hash(newPassword, 12);
+    const hashedNewPassword = await bcryptjs.hash(newPassword, 10);
+    user.oldPasswords = [user.password, ...(user.oldPasswords || [])].slice(0, 5);
+    user.password = hashedNewPassword;
+    user.passwordChangedAt = new Date();
     user.resetPasswordOTP = undefined;
     user.resetPasswordOTPExpiry = undefined;
+
     await user.save();
+
+    await logActivity(user._id, 'Password Reset Successful', { email });
 
     res.status(200).json({ success: true, message: 'Password reset successful' });
   } catch (error) {
@@ -348,26 +569,47 @@ export const resetPassword = async (req, res, next) => {
   }
 };
 
-// Google Auth
+// ✅ LOGOUT
+export const logout = async (req, res, next) => {
+  await logActivity(req.user?.id || 'Unknown', 'User Logged Out');
+  res
+    .clearCookie('access_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+    })
+    .status(200)
+    .json({
+      success: true,
+      message: 'Logged out successfully',
+      timestamp: new Date().toISOString(),
+    });
+};
+
+// ✅ GOOGLE AUTH
 export const google = async (req, res, next) => {
   try {
-    const { email, name, googlePhotoUrl } = req.body;
-    if (!email || !name || !googlePhotoUrl) {
-      return next(errorHandler(400, 'Google account data incomplete'));
-    }
+    const safeBody = mongoSanitize(req.body);
+    let { email, name } = safeBody;
+
+    if (!email || !name)
+      return next(errorHandler(400, 'Incomplete Google account data'));
+
+    email = email.trim().toLowerCase();
+    name = name.trim();
+
+    const usernameBase = name.toLowerCase().replace(/\s/g, '');
+    const username = `${usernameBase}_${Math.floor(Math.random() * 10000)}`;
 
     let user = await User.findOne({ email });
-
     if (!user) {
       const tempPass = crypto.randomBytes(16).toString('hex');
-      const hashedPassword = await bcryptjs.hash(tempPass, 12);
-      const username = `${name.toLowerCase().replace(/\s/g, '')}_${Math.floor(Math.random() * 10000)}`;
+      const hashedPassword = await bcryptjs.hash(tempPass, 10);
 
       user = new User({
         username,
         email,
         password: hashedPassword,
-        profilePicture: googlePhotoUrl,
         isVerified: true,
         consentGivenAt: new Date(),
       });
@@ -375,32 +617,48 @@ export const google = async (req, res, next) => {
       await user.save();
     }
 
-    const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, process.env.JWT_SECRET, {
-      expiresIn: '15m',
-    });
+    const token = jwt.sign(
+      { id: user._id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET,
+      { expiresIn: '15m' }
+    );
 
-    const { password, ...rest } = user._doc;
+    const {
+      password,
+      otp,
+      otpExpires,
+      resetPasswordOTP,
+      resetPasswordOTPExpiry,
+      ...userData
+    } = user._doc;
+
+    await logActivity(user._id, 'Google OAuth Sign In', { email });
 
     res
       .cookie('access_token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'Strict',
-        maxAge: 15 * 60 * 1000,
       })
       .status(200)
-      .json(rest);
+      .json(userData);
   } catch (error) {
     next(error);
   }
 };
 
-// Contact Form
+// ✅ CONTACT FORM
 export const sendContactEmail = async (req, res, next) => {
   try {
-    const { userEmail, subject, message } = req.body;
-    if (!userEmail || !subject || !message) return next(errorHandler(400, 'All fields required'));
+    const safeBody = mongoSanitize(req.body);
+    let { userEmail, subject, message } = safeBody;
+
+    if (!userEmail || !subject || !message)
+      return next(errorHandler(400, 'All fields are required'));
     if (!isEmail(userEmail)) return next(errorHandler(400, 'Invalid email'));
+
+    subject = sanitizeEmailInput(subject);
+    message = sanitizeEmailInput(message);
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -422,4 +680,3 @@ export const sendContactEmail = async (req, res, next) => {
     next(error);
   }
 };
-

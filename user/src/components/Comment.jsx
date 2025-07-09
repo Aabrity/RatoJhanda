@@ -13,22 +13,41 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
   const [editedContent, setEditedContent] = useState(comment.content);
   const { currentUser } = useSelector((state) => state.user);
 
+  // useEffect(() => {
+  //   const getUser = async () => {
+  //     try {
+  //       const res = await fetch(`/api/user/public/${comment.userId}`);
+  //       const data = await res.json();
+  //       if (res.ok) {
+  //         setUser(data);
+  //       } else {
+  //         toast.error('Failed to fetch user data');
+  //       }
+  //     } catch (error) {
+  //       toast.error('Error fetching user data');
+  //     }
+  //   };
+  //   getUser();
+  // }, [comment]);
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const res = await fetch(`/api/user/${comment.userId}`);
-        const data = await res.json();
-        if (res.ok) {
-          setUser(data);
-        } else {
-          toast.error('Failed to fetch user data');
-        }
-      } catch (error) {
-        toast.error('Error fetching user data');
+  const getUser = async () => {
+    const userId = comment.userId?._id || comment.userId;
+    if (!userId) return;
+
+    try {
+      const res = await fetch(`/api/user/public/${userId}`);
+      const data = await res.json();
+      if (res.ok) {
+        setUser(data);
+      } else {
+        toast.error('Failed to fetch user data');
       }
-    };
-    getUser();
-  }, [comment]);
+    } catch (error) {
+      toast.error('Error fetching user data');
+    }
+  };
+  getUser();
+}, [comment]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -63,7 +82,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
       <div className="flex-shrink-0 mr-3">
         <img
           className="w-10 h-10 rounded-full bg-gray-200"
-          src={user.profilePicture}
+          src={`/uploads/${user.profilePicture}`}
           alt={user.username}
         />
       </div>
