@@ -71,11 +71,11 @@
 //     next(errorHandler(500, 'Internal server error.'));
 //   }
 // };
+import sanitize from 'mongo-sanitize';
 import Post from '../models/post.model.js';
 import Report from '../models/report.model.js';
 import { errorHandler } from '../utils/error.js';
-import { logActivity } from '../utils/loggers.js'; 
-import sanitize from 'mongo-sanitize';
+import { logActivity } from '../utils/loggers.js';
 
 // 🛡️ OWASP: Validate input, sanitize, prevent self-reporting & DB injection
 export const reportPost = async (req, res, next) => {
