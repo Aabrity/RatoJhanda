@@ -1,4 +1,7 @@
+
+import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
+import validator from 'validator';
 
 const userSchema = new mongoose.Schema(
   {
@@ -10,6 +13,7 @@ const userSchema = new mongoose.Schema(
       minlength: [3, 'Username must be at least 3 characters'],
       maxlength: [30, 'Username must be at most 30 characters'],
       match: [/^[a-zA-Z0-9_]+$/, 'Username must be alphanumeric (with underscores)'],
+      index: true, // for faster lookup
     },
     email: {
       type: String,
@@ -17,21 +21,27 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      // match: [/.+@.+\\..+/, 'Please provide a valid email address'],
+      validate: {
+        validator: validator.isEmail,
+        message: 'Please provide a valid email address',
+      },
+      index: true, // for faster lookup
     },
     password: {
       type: String,
       required: [true, 'Password is required'],
       minlength: [8, 'Password must be at least 8 characters long'],
-      select: false, // Prevent password from being returned by default
+      select: false, // do not return password by default
     },
     profilePicture: {
       type: String,
-      default: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
+      default:
+        'person.png', // default profile picture if none is uploaded
     },
     isAdmin: {
       type: Boolean,
       default: false,
+      immutable: true,
     },
     isVerified: {
       type: Boolean,
@@ -53,9 +63,25 @@ const userSchema = new mongoose.Schema(
       type: Number,
       select: false,
     },
+       oldPasswords: {
+      type: [String],
+      default: [],
+      select: false, // do not expose this by default
+    },
+    passwordChangedAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
   { timestamps: true }
 );
 
+
+// Instance method to compare password on login
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
 const User = mongoose.model('User', userSchema);
+
 export default User;
