@@ -342,15 +342,15 @@
 import bcryptjs from 'bcryptjs';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
+import mongoSanitize from 'mongo-sanitize';
 import nodemailer from 'nodemailer';
 import validator from 'validator';
-import mongoSanitize from 'mongo-sanitize';
 
 import User from '../models/user.model.js';
 import { errorHandler } from '../utils/error.js';
+import { logActivity } from '../utils/loggers.js';
 import { sanitizeEmailInput, sanitizeUsername } from '../utils/sanitize.js';
 import { sendEmail } from '../utils/sendEmail.js';
-import { logActivity } from '../utils/loggers.js';
 
 const { isEmail } = validator;
 
