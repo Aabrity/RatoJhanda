@@ -1,46 +1,4 @@
 
-// import Report from '../models/report.model.js';
-// import { errorHandler } from '../utils/error.js';
-
-// // Utility to validate positive integers for pagination
-// const validatePositiveInt = (value, defaultValue) => {
-//   const num = parseInt(value);
-//   if (isNaN(num) || num <= 0) return defaultValue;
-//   return num;
-// };
-
-// export const getAllReports = async (req, res, next) => {
-//   // Authorize admin only
-//   if (!req.user.isAdmin) return next(errorHandler(403, 'Forbidden'));
-
-//   // Pagination query params with defaults
-//   const page = validatePositiveInt(req.query.page, 1);
-//   const limit = validatePositiveInt(req.query.limit, 20);
-//   const skip = (page - 1) * limit;
-
-//   try {
-//     // Fetch total count for client-side pagination info
-//     const totalReports = await Report.countDocuments();
-
-//     const reports = await Report.find()
-//       .select('reason createdAt postId reporterId') // select only required fields from Report
-//       .populate('postId', 'title slug')              // limit populated post fields
-//       .populate('reporterId', 'username email')      // limit reporter fields
-//       .sort({ createdAt: -1 })
-//       .skip(skip)
-//       .limit(limit);
-
-//     res.status(200).json({
-//       page,
-//       limit,
-//       totalReports,
-//       totalPages: Math.ceil(totalReports / limit),
-//       reports,
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
 import Report from '../models/report.model.js';
 import { errorHandler } from '../utils/error.js';
 import mongoSanitize from 'mongo-sanitize';  // npm install mongo-sanitize

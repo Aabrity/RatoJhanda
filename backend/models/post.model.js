@@ -13,7 +13,7 @@ const postSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      index: true,          // speeds up “show my posts” queries
+      index: true,         
     },
 
     /* ─── PUBLIC FACING FIELDS ─────────────────────────────────────────── */
@@ -23,14 +23,14 @@ const postSchema = new Schema(
       trim: true,
       minlength: 5,
       maxlength: 140,
-      unique: true,         // + case‑insensitive index in Mongo ≥ 4.2
+      unique: true,        
     },
     slug: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
-      match: /^[a-z0-9-]+$/, // prevents weird Unicode homograph tricks
+      match: /^[a-z0-9-]+$/, 
       index: true,
     },
     content: {
@@ -84,7 +84,7 @@ const postSchema = new Schema(
 );
 
 /* ─── INDEXES & PLUGINS ────────────────────────────────────────────────── */
-// postSchema.index({ geolocation: '2dsphere' });      // enables fast geo queries
+
 postSchema.plugin(uniqueValidator, {
   message: '{PATH} already exists.',
 });

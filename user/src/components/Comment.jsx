@@ -13,22 +13,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
   const [editedContent, setEditedContent] = useState(comment.content);
   const { currentUser } = useSelector((state) => state.user);
 
-  // useEffect(() => {
-  //   const getUser = async () => {
-  //     try {
-  //       const res = await fetch(`/api/user/public/${comment.userId}`);
-  //       const data = await res.json();
-  //       if (res.ok) {
-  //         setUser(data);
-  //       } else {
-  //         toast.error('Failed to fetch user data');
-  //       }
-  //     } catch (error) {
-  //       toast.error('Error fetching user data');
-  //     }
-  //   };
-  //   getUser();
-  // }, [comment]);
+
   useEffect(() => {
   const getUser = async () => {
     const userId = comment.userId?._id || comment.userId;
