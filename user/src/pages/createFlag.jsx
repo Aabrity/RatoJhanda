@@ -1,15 +1,17 @@
 
-import L from 'leaflet';
-import 'leaflet.awesome-markers';
-import 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css';
-import { useState } from 'react';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 import {
   Button,
   FileInput,
   Select,
   TextInput,
 } from 'flowbite-react';
+import L from 'leaflet';
+import 'leaflet.awesome-markers';
+import 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css';
 import 'leaflet/dist/leaflet.css';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 import {
   MapContainer,
   Marker,
@@ -20,10 +22,8 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useNavigate } from 'react-router-dom';
 import slugify from 'slugify';
-import '@fortawesome/fontawesome-free/css/all.min.css';
 import greenflag from '../assets/pin.png';
 import redflag from '../assets/red-flag.png';
-import { toast } from 'react-hot-toast';
 
 export default function CreateFlag() {
   const [formData, setFormData] = useState({
@@ -224,6 +224,10 @@ export default function CreateFlag() {
             setFormData({ ...formData, location: e.target.value })
           }
         />
+        <p className="text-sm text-gray-500 italic mt-1">
+  Location Auto-fills after you select on the map below.
+</p>
+
 
         {/* Flag Selector */}
         <Select
@@ -305,13 +309,21 @@ export default function CreateFlag() {
 
         {/* Anonymous Checkbox */}
         <div className="flex items-center gap-3">
-          <input
+          {/* <input
             type="checkbox"
             id="anonymous"
             onChange={(e) =>
-              setFormData({ ...formData, anonymous: e.target.checked })
+              setFormData({ ...formData, isAnonymous: e.target.checked })
             }
-          />
+          /> */}
+          <input
+  type="checkbox"
+  id="anonymous"
+  onChange={(e) => {
+    setFormData({ ...formData, isAnonymous: e.target.checked });
+    console.log('Anonymous checked:', e.target.checked);
+  }}
+/>
           <label htmlFor="anonymous" className="cursor-pointer">
             Post anonymously
           </label>

@@ -24,7 +24,7 @@ export default function PostCard({ post }) {
         
         <Link
           to={`/post/${post.slug}`}
-          className="absolute left-3 right-3 bottom-0 sm:group-hover:bottom-0 sm:bottom-[-200px] transition-all duration-300 bg-white/90 border border-red-600 text-red-600 hover:bg-red-800 hover:text-white text-center py-2 rounded-md !rounded-tl-none"
+          className="absolute left-3 right-3 bottom-0 sm:group-hover:bottom-0 sm:bottom-[-200px] transition-all duration-300 bg-white/90 border border-red-600 dark:bg-gray-600 dark:hover:bg-red-800  text-red-600 hover:bg-red-800 hover:text-white text-center py-2 rounded-md !rounded-tl-none"
         >
           Read article
         </Link>

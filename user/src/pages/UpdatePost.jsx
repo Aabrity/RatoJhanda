@@ -1,22 +1,22 @@
 
 import {
   Button,
+  Checkbox,
   FileInput,
   Select,
   TextInput,
-  Checkbox,
 } from 'flowbite-react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { useEffect, useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
 import { useSelector } from 'react-redux';
-import toast, { Toaster } from 'react-hot-toast';
+import { useNavigate, useParams } from 'react-router-dom';
 import greenflag from '../assets/pin.png';
 import redflag from '../assets/red-flag.png';
-import L from 'leaflet';
 
 const redFlagIcon = new L.Icon({
   iconUrl: redflag,
@@ -204,6 +204,11 @@ export default function UpdatePost() {
           </Select>
         </div>
 
+        <p className="text-sm text-gray-500 italic mt-1">
+ Location Auto-fills after you select on the map below.
+</p>
+
+
         <TextInput
           type="text"
           placeholder="Location"
@@ -249,7 +254,7 @@ export default function UpdatePost() {
         {formData.images && (
           <div className="relative w-full h-72 mb-4">
             <img
-              src={formData.images}
+              src={ `/uploads/${currentUser.profilePicture}`}
               alt="uploaded"
               className="w-full h-full object-cover rounded-md"
             />

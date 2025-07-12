@@ -1,10 +1,10 @@
 
-import { useState, useEffect } from 'react';
+import { Button, Modal } from 'flowbite-react';
+import { useEffect, useState } from 'react';
+import { toast, Toaster } from 'react-hot-toast';
+import { HiOutlineExclamationCircle } from 'react-icons/hi';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Modal, Button } from 'flowbite-react';
-import { HiOutlineExclamationCircle } from 'react-icons/hi';
-import { toast, Toaster } from 'react-hot-toast';
 
 export default function ShowPosts() {
   const { currentUser } = useSelector((state) => state.user);
@@ -18,7 +18,7 @@ export default function ShowPosts() {
         const res = await fetch(`/api/post/posts/${currentUser._id}`);
         const data = await res.json();
         if (data.success === false) {
-          toast.error('Failed to fetch posts.');
+          toast.error('Failed to fetch posts or no posts yet.');
           return;
         }
         setUserPosts(data);
@@ -68,7 +68,7 @@ export default function ShowPosts() {
           >
             <Link to={`/post/${post._id}`}>
               <img
-                src={post.images || '/placeholder.jpg'}
+                src={ `/uploads/${post.images}` || '/placeholder.jpg'}
                 alt="Post cover"
                 className="h-16 w-16 object-contain"
               />

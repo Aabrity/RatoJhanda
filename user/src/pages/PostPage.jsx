@@ -216,7 +216,7 @@ export default function PostPage() {
             <h2 className="text-md font-semibold text-gray-700 dark:text-gray-300 px-4 py-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700">
               📍 Location <br /> {post.location}
             </h2>
-            <div className="relative">
+            <div className="relative z-0">
             <div className="relative group">
   <MapContainer
     center={[post.geolocation.lat, post.geolocation.lng]}

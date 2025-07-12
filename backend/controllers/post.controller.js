@@ -320,7 +320,7 @@ export const createPost = async (req, res, next) => {
     req.params = sanitize(req.params);
     req.query = sanitize(req.query);
 
-    const { title, content, category, images, location, geolocation } = req.body;
+    const { title, content, category,isAnonymous, images, location, geolocation } = req.body;
     if (!images) {
       return next(errorHandler(400, 'Image is required'));
     }
@@ -342,6 +342,7 @@ export const createPost = async (req, res, next) => {
       title: safeTitle,
       content: safeContent,
       category,
+      isAnonymous: req.body.isAnonymous || false,
       images: imageUrl, // store URL, not base64
       location: safeLocation,
       geolocation,
