@@ -90,3 +90,4 @@ postSchema.plugin(uniqueValidator, {
 });
 
 export default mongoose.model('Post', postSchema);
+

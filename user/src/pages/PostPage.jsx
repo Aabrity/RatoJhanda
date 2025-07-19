@@ -273,7 +273,7 @@ export default function PostPage() {
         </div>
       </div>
 
-      <Modal
+      {/* <Modal
         show={showReportModal}
         onClose={() => setShowReportModal(false)}
         size="md"
@@ -351,7 +351,90 @@ export default function PostPage() {
             )}
           </div>
         </Modal.Body>
-      </Modal>
+      </Modal> */}
+      <Modal
+  show={showReportModal}
+  onClose={() => setShowReportModal(false)}
+  size="md"
+  popup
+>
+  <Modal.Header />
+  <Modal.Body>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
+        Report this post
+      </h3>
+
+      {reportError && (
+        <p className="text-red-600 text-center">{reportError}</p>
+      )}
+
+      {reportSuccess ? (
+        <p className="text-green-600 text-center">
+          Report submitted successfully!
+        </p>
+      ) : (
+        <>
+          <label
+            htmlFor="reason"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
+            Reason <span className="text-red-500">*</span>
+          </label>
+         <Select
+  id="reason"
+  required
+  value={reportReason}
+  onChange={(e) => setReportReason(e.target.value)}
+  className="border-red-300 focus:ring-red-500 focus:border-red-500 dark:focus:ring-red-400 dark:focus:border-red-400 text-sm text-gray-900 dark:text-gray-100"
+  color="failure"
+>
+  <option value="" disabled>
+    -- Select a reason --
+  </option>
+  <option value="Spam">Spam</option>
+  <option value="Abusive Content">Abusive Content</option>
+  <option value="False Information">False Information</option>
+  <option value="Other">Other</option>
+</Select>
+
+          <label
+            htmlFor="comment"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
+            Additional comments (optional)
+          </label>
+          <Textarea
+            id="comment"
+            placeholder="Add any details here"
+            rows={3}
+            value={reportComment}
+            onChange={(e) => setReportComment(e.target.value)}
+            className="focus:ring-red-500 focus:border-red-500 dark:focus:ring-red-400 dark:focus:border-red-400"
+          />
+
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button
+              color="gray"
+              onClick={() => setShowReportModal(false)}
+              disabled={reportLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="failure"
+              onClick={handleReportSubmit}
+              disabled={reportLoading}
+            >
+              {reportLoading ? <Spinner size="sm" /> : 'Submit Report'}
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
+  </Modal.Body>
+</Modal>
+
     </div>
   );
 }

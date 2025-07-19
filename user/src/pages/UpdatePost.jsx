@@ -254,7 +254,7 @@ export default function UpdatePost() {
         {formData.images && (
           <div className="relative w-full h-72 mb-4">
             <img
-              src={ `/uploads/${currentUser.profilePicture}`}
+              src={ `/uploads/${formData.images}`}
               alt="uploaded"
               className="w-full h-full object-cover rounded-md"
             />

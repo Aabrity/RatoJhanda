@@ -2,6 +2,8 @@
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
 import validator from 'validator';
+import Post from './post.model.js';
+import Comment from './comment.model.js'; 
 
 const userSchema = new mongoose.Schema(
   {
@@ -76,6 +78,18 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+userSchema.pre('findOneAndDelete', async function (next) {
+  try {
+    const user = await this.model.findOne(this.getFilter());
+    if (user) {
+      await Post.deleteMany({ userId: user._id });
+      await Comment.deleteMany({ userId: user._id });
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Instance method to compare password on login
 userSchema.methods.comparePassword = async function (candidatePassword) {

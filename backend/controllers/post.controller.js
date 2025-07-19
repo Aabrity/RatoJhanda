@@ -1,6 +1,6 @@
 
 import { validationResult } from 'express-validator';
-import sanitize from 'mongo-sanitize'; // imported mongo-sanitize
+import sanitize from 'mongo-sanitize'; 
 import sanitizeHtml from 'sanitize-html';
 import Post from '../models/post.model.js';
 import { errorHandler } from '../utils/error.js';

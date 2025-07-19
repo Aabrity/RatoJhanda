@@ -28,10 +28,10 @@ export default function Home() {
           {/* Left Side Content */}
           <div className="lg:col-span-2 text-center lg:text-left space-y-4">
             <h1 className="text-2xl md:text-3xl font-bold dark:text-white">
-              Welcome to RatoFlag
+              Welcome to RatoJhanda
             </h1>
         <p className="whitespace-pre text-sm md:text-base text-gray-700 dark:text-gray-300">
-  RatoFlag is  a platform  where citizens  can  report issues they <br />
+  RatoJhanda is  a platform  where citizens  can  report issues they <br />
   encounter in  their  locality and ensure  about a solution. From <br />
   potholes to broken streetlights, garbage dumps to water leaks <br />
   we connect you with concerned authorities  and empower your <br />

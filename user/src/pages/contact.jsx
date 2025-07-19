@@ -40,6 +40,12 @@ export default function ContactPage() {
     setLoading(true);
 
     try {
+      console.log("Payload:", {
+  email: currentUser?.email,
+  subject,
+  message,
+});
+
       const res = await fetch('/api/auth/sendEmail', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

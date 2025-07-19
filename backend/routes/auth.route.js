@@ -52,12 +52,25 @@ const emailLimiter = rateLimit({
   message: 'Too many email submissions. Try again later.',
 });
 
-// 🧼 Validate /sendEmail input
+// // 🧼 Validate /sendEmail input
+// const validateContactMessage = (req, res, next) => {
+//   const { name, email, message } = req.body;
+//   if (
+//     typeof name !== 'string' ||
+//     typeof email !== 'string' ||
+//     typeof message !== 'string' ||
+//     message.trim().length === 0 ||
+//     message.length > 1000
+//   ) {
+//     return res.status(400).json({ error: 'Invalid input' });
+//   }
+//   next();
+// };
 const validateContactMessage = (req, res, next) => {
-  const { name, email, message } = req.body;
+  const { userEmail, subject, message } = req.body;
   if (
-    typeof name !== 'string' ||
-    typeof email !== 'string' ||
+    typeof userEmail !== 'string' ||
+    typeof subject !== 'string' ||
     typeof message !== 'string' ||
     message.trim().length === 0 ||
     message.length > 1000
